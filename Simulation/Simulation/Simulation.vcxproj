@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="Distances.h" />
     <ClInclude Include="EnvManager.h" />
+    <ClInclude Include="INetwork.h" />
     <ClInclude Include="json11.hpp" />
     <ClInclude Include="LSTM.h" />
     <ClInclude Include="PredatorSwarm.h" />

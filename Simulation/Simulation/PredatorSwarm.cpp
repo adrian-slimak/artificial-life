@@ -4,22 +4,33 @@
 #include "PreySwarm.h"
 #include "Distances.h"
 #include "LSTM.h"
+#include "RNN.h"
 
 #include <iostream>
 
 int PredatorSwarm::population_size = 4;
 int PredatorSwarm::brain_cells = 8;
+NetworkType PredatorSwarm::network_type = NetworkType::_LSTM;
 int PredatorSwarm::observations_size = 39;
 int PredatorSwarm::actions_size = 2;
 
 float PredatorSwarm::vision_range = 100.f;
 float PredatorSwarm::vision_range_squared = 100.f*100.f;
 float PredatorSwarm::vision_angle = 182.f;
-float PredatorSwarm::vision_angle_half = 91.f;
+float PredatorSwarm::vision_angle_half_rad = 91.f * Distances::deg2rad;
 int PredatorSwarm::vision_cells = 13;
-float PredatorSwarm::vision_cell_angle = 14.f;
+float PredatorSwarm::vision_cell_angle_rad = 14.f * Distances::deg2rad;
+
+bool PredatorSwarm::hear_enabled = false;
+float PredatorSwarm::hear_range = 150.f;
+float PredatorSwarm::hear_range_squared = 150.f*150.f;
+int PredatorSwarm::hear_cells = 12;
+float PredatorSwarm::hear_cell_angle_rad = 30.f * Distances::deg2rad;
+
+bool PredatorSwarm::communication_enabled = false;
 
 float PredatorSwarm::eat_range = 5.f;
+float PredatorSwarm::eat_range_squared = 5.f*5.f;
 int PredatorSwarm::eat_delay = 10;
 
 float PredatorSwarm::move_speed = 3.f;
@@ -40,7 +51,11 @@ PredatorSwarm::PredatorSwarm()
 	target_id = Eigen::VectorXi(population_size);
 	eat_delays = Eigen::VectorXi(population_size);
 
-	this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
+	if(network_type == NetworkType::_LSTM)
+		this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
+	else
+		this->model = new RNN(observations_size, brain_cells, actions_size, population_size);
+
 	this->model->build();
 }
 
@@ -59,7 +74,7 @@ void PredatorSwarm::reset()
 	position *= Simulation::world_size_half;
 	angle.setRandom();
 	angle += Eigen::VectorXf::Constant(population_size, 1.);
-	angle *= 3.14;
+	angle *= 3.14f;
 
 	fitness = 0.f;
 	mean_density = 0.f;
@@ -96,9 +111,9 @@ void PredatorSwarm::update_observations()
 					if (distances->predator_distances(self_id, predator_id) < vision_range_squared)
 					{
 						float angle = calculate_angle(self_id, predator_id);
-						if (std::abs(angle) < vision_angle_half)
+						if (std::abs(angle) < vision_angle_half_rad)
 						{
-							int obs_id = int((vision_angle_half - angle) / vision_cell_angle) + vision_cells;
+							int obs_id = int((vision_angle_half_rad - angle) / vision_cell_angle_rad) + vision_cells;
 							if (distances->predator_distances(self_id, predator_id) < model->x(self_id, obs_id))
 								model->x(self_id, obs_id) = distances->predator_distances(self_id, predator_id);
 						}
@@ -116,9 +131,9 @@ void PredatorSwarm::update_observations()
 					if (distances->prey_predator_distances(prey_id, self_id) < vision_range_squared)
 					{
 						float angle = calculate_angle_preys(self_id, prey_id);
-						if (std::abs(angle) < vision_angle_half)
+						if (std::abs(angle) < vision_angle_half_rad)
 						{
-							int obs_id = int((vision_angle_half - angle) / vision_cell_angle);
+							int obs_id = int((vision_angle_half_rad - angle) / vision_cell_angle_rad);
 							if (distances->prey_predator_distances(prey_id, self_id) < model->x(self_id, obs_id))
 								model->x(self_id, obs_id) = distances->prey_predator_distances(prey_id, self_id);
 
@@ -132,7 +147,7 @@ void PredatorSwarm::update_observations()
 				}
 			}
 
-			if (target_closest > eat_range)
+			if (target_closest > eat_range_squared)
 				target_id[self_id] = -1;
 
 			model->x.row(self_id) = model->x.row(self_id).unaryExpr([this](float elem)
@@ -147,14 +162,34 @@ float PredatorSwarm::calculate_angle(int a, int b)
 {
 	float Ux = position(b,0) - position(a,0);
 	float Uy = position(b,1) - position(a,1);
-	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a, 0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1))) * Distances::rad2deg;
+
+	if (Ux > Simulation::world_size_half)
+		Ux -= Simulation::world_size;
+	else if (Ux < -Simulation::world_size_half)
+		Ux += Simulation::world_size;
+	if (Uy > Simulation::world_size_half)
+		Uy -= Simulation::world_size;
+	else if (Uy < -Simulation::world_size_half)
+		Uy += Simulation::world_size;
+
+	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a, 0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1)));
 }
 
 float PredatorSwarm::calculate_angle_preys(int a, int b)
 {
 	float Ux = prey_swarm->position(b, 0) - position(a, 0);
 	float Uy = prey_swarm->position(b, 1) - position(a, 1);
-	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a, 0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1))) * Distances::rad2deg;
+
+	if (Ux > Simulation::world_size_half)
+		Ux -= Simulation::world_size;
+	else if (Ux < -Simulation::world_size_half)
+		Ux += Simulation::world_size;
+	if (Uy > Simulation::world_size_half)
+		Uy -= Simulation::world_size;
+	else if (Uy < -Simulation::world_size_half)
+		Uy += Simulation::world_size;
+
+	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a, 0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1)));
 }
 
 void PredatorSwarm::update_decisions()
@@ -170,7 +205,7 @@ void PredatorSwarm::update_movement()
 		{
 			angle(predator_id) += model->y(predator_id, 1) * turn_speed_rad;
 
-			angle(predator_id) = angle(predator_id) < 0.0 ? angle(predator_id) + 6.18 : angle(predator_id) > 6.18 ? angle(predator_id) - 6.18 : angle(predator_id);
+			angle(predator_id) = angle(predator_id) < 0.0f ? angle(predator_id) + 6.18f : angle(predator_id) > 6.18f ? angle(predator_id) - 6.18f : angle(predator_id);
 
 			float a = angle(predator_id);
 			norm(predator_id, 0) = std::cos(a);
@@ -218,14 +253,14 @@ void PredatorSwarm::update_stats()
 
 	if (number_alive > 0)
 	{
-		this->mean_density += (density / number_alive);
-		this->mean_dispersion += (dispersion / number_alive);
-		this->mean_attacks += (number_attacks / number_alive);
-		this->mean_hunts += (number_hunts / number_alive);
+		this->mean_density += (density / (float)number_alive);
+		this->mean_dispersion += (dispersion / (float)number_alive);
+		//this->mean_attacks += (number_attacks / (float)number_alive);
+		//this->mean_hunts += (number_hunts / (float)number_alive);
 	}
 
-	number_attacks = 0;
-	number_hunts = 0;
+	//number_attacks = 0;
+	//number_hunts = 0;
 	//else
 	//{
 	//	this->mean_density += 0.f;
@@ -247,7 +282,7 @@ void PredatorSwarm::try_hunt()
 			this->number_attacks++;
 
 			// Confusion effect
-			near_target_preys = 0.f;
+			near_target_preys = 0;
 			for (int prey_id = 0; prey_id < prey_swarm->population_size; prey_id++)
 			{
 				if (distances->prey_distances(target_id[predator_id], prey_id) < confusion_range_squared)
@@ -257,6 +292,7 @@ void PredatorSwarm::try_hunt()
 			if ((float)std::rand() / RAND_MAX < confusion_ratio / near_target_preys)
 			{
 				prey_swarm->alive[target_id[predator_id]] = false; // Attack successful
+				prey_swarm->number_alive--;
 				this->number_hunts++;
 			}
 

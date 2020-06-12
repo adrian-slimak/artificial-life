@@ -1,33 +1,37 @@
 #ifndef PREDATOR_SWARM_H
 #define PREDATOR_SWARM_H
 
-#include <Eigen/Dense>
+#include "INetwork.h"
 
 class Distances;
 class PreySwarm;
-class LSTM;
 
 class PredatorSwarm
 {
 public:
 	static int population_size;
 	static int brain_cells;
+	static NetworkType network_type;
 	static int observations_size;
 	static int actions_size;
 
 	static float vision_range;
 	static float vision_range_squared;
 	static float vision_angle;
-	static float vision_angle_half;
+	static float vision_angle_half_rad;
 	static int vision_cells;
-	static float vision_cell_angle;
+	static float vision_cell_angle_rad;
 
+	static bool hear_enabled;
 	static float hear_range;
 	static float hear_range_squared;
 	static int hear_cells;
-	static float hear_cell_angle;
+	static float hear_cell_angle_rad;
+
+	static bool communication_enabled;
 
 	static float eat_range;
+	static float eat_range_squared;
 	static int eat_delay;
 
 	static float move_speed;
@@ -45,7 +49,7 @@ public:
 	Eigen::MatrixXf norm;
 	Eigen::VectorXf angle;
 
-	LSTM *model;
+	INetwork *model;
 
 	float fitness;
 	float mean_density;

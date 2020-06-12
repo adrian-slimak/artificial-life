@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from other.hotkey_listener import HotKeyListener
 from pickle import dump
 import matplotlib
-from configs.learning_parameters import save_ID
+from learning_parameters import save_ID, results_save_path
 plt.style.use('ggplot')
 matplotlib.use('tkagg')
 
@@ -91,13 +91,13 @@ class LivePlot:
         # self.fig.canvas.flush_events()
 
     def save(self):
-        with open(f'results/data/data_{save_ID}.pkl', 'wb') as file:
+        with open(results_save_path+f'data/data_{save_ID}.pkl', 'wb') as file:
             to_save = {}
             for plot_name, plot in self.plots.items():
                 to_save[plot_name] = {'Y': plot.Y, 'title': plot.title, 'xlabel': plot.xlabel, 'ylabel': plot.ylabel}
             dump(to_save, file)
 
-        plt.savefig(f'results/plots/plot_{save_ID}.png')
+        plt.savefig(results_save_path+f'plots/plot_{save_ID}.png')
 
     def update(self, data):
         self.plot_queue.put(data)

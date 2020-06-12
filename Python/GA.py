@@ -1,4 +1,4 @@
-import configs.learning_parameters as _lp
+import learning_parameters as _lp
 from pickle import load
 import numpy as np
 import random
@@ -40,25 +40,12 @@ class Genotype:
         return new_one
 
     def random_init(self, min=_lp.init_min_genes, max=_lp.init_max_genes, loc=_lp.init_loc, scale=_lp.init_scale):
-        # percentOfGenes = random.uniform(min, max)
-        # numOfGenes = int(self.length * percentOfGenes)
-        # genesIdx = random.sample(range(0, self.length - 1), numOfGenes)
-        # genesVals = np.random.normal(loc=loc, scale=scale, size=self.length)
-        # for id in genesIdx:
-        #     self.genotype[id] = genesVals[id]
-        self.genotype = np.arange(0, self.length)
-
-    def to_numpy(self, shapes):
-        w_b = ([], [])
-        p = 0
-        l_id = 0
-        for s_w_b, e_w_b in zip(shapes, w_b):
-            for shape in s_w_b:
-                l = self.lengths[l_id]
-                e_w_b.append(np.reshape(self.genotype[p:p+l], shape))
-                p += l
-                l_id += 1
-        return w_b
+        percentOfGenes = random.uniform(min, max)
+        numOfGenes = int(self.length * percentOfGenes)
+        genesIdx = random.sample(range(0, self.length - 1), numOfGenes)
+        genesVals = np.random.normal(loc=loc, scale=scale, size=self.length)
+        for id in genesIdx:
+            self.genotype[id] = genesVals[id]
 
 
 class GeneticAlgorithm:
@@ -198,21 +185,12 @@ class GeneticAlgorithm:
         #     individual.genotype[i1:i1+(individual.length-i2-1)] = individual.genotype[i2+1:]
         #     individual.genotype[-(i2 - i1 + 1):] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale, size=i2-i1+1)
 
-    def to_model(self):
-        weights = [[] for i in self.shapes[0]]
-        biases = [[] for i in self.shapes[1]] if self.use_bias else None
+    def to_genes(self):
+        genes = []
 
         for individual in self.population:
-            (i_weights, i_biases) = individual.to_numpy(self.shapes)
-            for i_w, w in zip(i_weights, weights):
-                w.append(i_w)
+            genes.append(individual.genotype)
 
-            if self.use_bias:
-                for i_b, b in zip(i_biases, biases):
-                    b.append(i_b)
+        genes = np.array(genes)
 
-        weights = [np.array(weight, dtype='f') for weight in weights]
-        if self.use_bias:
-            biases = [np.array(bias, dtype='f') for bias in biases]
-
-        return weights, biases
+        return genes

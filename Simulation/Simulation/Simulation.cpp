@@ -63,51 +63,69 @@ void Simulation::runSingleEpisode()
 {
 	this->reset();
 
+
+	// Warmup without predators
 	while (step < steps_without_predators)
 	{
 		this->distances->recalculate_prey_distances();
 		this->prey_swarm->update_observations_preys();
+		Eigen::MatrixXf C(this->prey_swarm->model->x.rows(), this->prey_swarm->model->x.cols());
+		C = this->prey_swarm->model->x;
+		this->prey_swarm->recalculate_prey_distances_observations();
+
+		bool flag = true;
+		for (int x = 0; x < this->prey_swarm->model->x.rows(); x++)
+			for (int y = 0; y < this->prey_swarm->model->x.cols(); y++)
+				if (this->prey_swarm->model->x(x, y) != C(x, y))
+					flag = false;
+		std::cout << flag << std::endl;
+
 		this->prey_swarm->update_decisions();
+
+		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
 
 		if (visualization) visualization->render();
 
 		this->prey_swarm->update_movement();
 
 		this->prey_swarm->update_fitness();
-		this->prey_swarm->update_stats();
 
 		step++;
 	}
 
- 	while (step < simulation_steps)
+	// Main simulation loop
+	while (step < simulation_steps)
 	{
-		updateObservations();
+		this->distances->recalculate_prey_predator_distances();
+		this->prey_swarm->update_observations();
+		this->predator_swarm->update_observations();
 
 		prey_swarm->update_decisions();
 		predator_swarm->update_decisions();
 
+		this->prey_swarm->update_stats();
+		this->predator_swarm->update_stats();
+
 		if (visualization) visualization->render();
 
-		this->prey_swarm->update_movement(); // ROZKMINIc, CZY NA PEWNO dobra kolejnosc, jak mieli w innych pracach
+		this->predator_swarm->try_hunt();
 		this->predator_swarm->update_movement();
-        this->predator_swarm->try_hunt(); // Tutaj czy potem??
+		this->prey_swarm->update_movement();
 
 		this->prey_swarm->update_fitness();
 		this->predator_swarm->update_fitness();
-		this->prey_swarm->update_stats();
-		this->predator_swarm->update_stats();
 
 		step++;
 	}
 
-    this->prey_swarm->mean_density /= simulation_steps;
+	this->prey_swarm->mean_density /= simulation_steps;
 	this->prey_swarm->mean_dispersion /= simulation_steps;
 
-    float simulation_steps_predators = (simulation_steps - steps_without_predators);
+	int simulation_steps_predators = (simulation_steps - steps_without_predators);
 	this->predator_swarm->mean_density /= simulation_steps_predators;
-	this->predator_swarm->mean_dispersion /= simulation_steps_predators;
-	this->predator_swarm->mean_attacks /= simulation_steps_predators;  // Czy na pewno tak i czy to ma sens??
-	this->predator_swarm->mean_hunts /= simulation_steps_predators;
+	this->predator_swarm->mean_dispersion /= simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
+	this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / (float)this->predator_swarm->number_alive;
+	this->predator_swarm->mean_hunts = this->predator_swarm->number_hunts / (float)this->predator_swarm->number_alive;
 }
 
 void Simulation::runInThread()
@@ -119,27 +137,4 @@ void Simulation::threadJoin()
 {
 	_thread->join();
 	delete _thread;
-}
-
-void Simulation::updateObservationsPreys()
-{
-	this->distances->recalculate_prey_distances();
-	this->prey_swarm->update_observations_preys();
-}
-
-void Simulation::updateObservations()
-{
-	this->distances->recalculate_prey_distances();
-	this->distances->recalculate_predator_distances();
-
-	this->prey_swarm->update_observations();
-	this->predator_swarm->update_observations();
-}
-
-void Simulation::updateMovement()
-{
-	this->predator_swarm->try_hunt();
-
-	this->prey_swarm->update_movement();
-	this->predator_swarm->update_movement();
 }

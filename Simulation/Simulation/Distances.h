@@ -24,13 +24,8 @@ public:
 	~Distances();
 
 	void recalculate_prey_distances();
-	void recalculate_predator_distances();
+	void recalculate_prey_predator_distances();
 	void reset();
-
-	static float calculate_angle(float xa, float ya, float a, float xb, float yb);
-
-private:
-	static void calculate_distances(Eigen::MatrixXf & A, Eigen::MatrixXf & B, Eigen::MatrixXf & C);
 };
 
 #endif

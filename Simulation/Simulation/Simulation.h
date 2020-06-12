@@ -43,10 +43,5 @@ public:
 
 	void runInThread();
 	void threadJoin();
-
-private:
-	void updateObservationsPreys();
-	void updateObservations();
-	void updateMovement();
 };
 #endif

@@ -1,62 +1,74 @@
-from mlagents.multi_unity_environment import MultiUnityEnvironment
-import configs.learning_parameters as _lp
-from networks.GA import GeneticAlgorithm
-import configs.plots_parameters as _pp
 from other.live_plot import LivePlot
-import numpy as np
 from other.utils import save_genes
-
+import learning_parameters as _lp
+from GA import GeneticAlgorithm
+import plots_parameters as _pp
+import numpy as np
+import EnvManager
+from time import time
+np.set_printoptions(precision=3)
+np.set_printoptions(suppress=True)
 
 def main():
     live_plot = LivePlot(plots=_pp.plot_structure, subplots=_pp.plot_subplots, figsize=_pp.plot_size) if _lp.show_plots else None
 
-    unity_environment = MultiUnityEnvironment(file_path=_lp.unity_environment_path,
-                                              number_of_environments=_lp.number_of_environments,
-                                              engine_configuration=_lp.engine_configuration,
-                                              environment_parameters=_lp.environment_parameters,
-                                              batch_mode=True)
+    EnvManager.set_parameters(_lp.config_file_path)
 
-    _brains = unity_environment.external_brains
-    GAs = {}
-    GAs['prey'] = GeneticAlgorithm(_brains['prey'].observations_vector_size, _lp.units, _brains['prey'].actions_vector_size, _brains['prey'].agents_count, model_name=_lp.NetworkModel.name, use_bias=_lp.use_bias)
-    GAs['predator'] = GeneticAlgorithm(_brains['predator'].observations_vector_size, _lp.units, _brains['predator'].actions_vector_size, _brains['predator'].agents_count * _lp.number_of_environments, model_name=_lp.NetworkModel.name, use_bias=_lp.use_bias)
+    # Get pointers to fitness array and stats array
+    prey_fitness = np.zeros(_lp.population_size).astype(np.float32)
+    predator_fitness = np.zeros(_lp.population_size).astype(np.float32)
+    prey_stats = np.zeros(5).astype(np.float32)
+    predator_stats = np.zeros(5).astype(np.float32)
+    prey_fitness_pointer = float(prey_fitness.__array_interface__['data'][0])
+    predator_fitness_pointer = float(predator_fitness.__array_interface__['data'][0])
+    prey_stats_pointer = float(prey_stats.__array_interface__['data'][0])
+    predator_stats_pointer = float(predator_stats.__array_interface__['data'][0])
 
-    GAs['prey'].initial_population()
-    GAs['predator'].initial_population()
+    # Create Genetic Algorithms for prey swarm and predator swarm
+    GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, "lstm")
+    GA_predator = GeneticAlgorithm(_lp.predator_observations_size, _lp.predator_brain_cells, _lp.predator_actions_size, _lp.population_size, "lstm")
+    # Initialize Genetic Algorithms with random genes
+    GA_prey.initial_population()
+    GA_predator.initial_population()
+
+    # Create Environment Manager
+    env_manager = EnvManager.EnvManager()
+    # Set EnvManager pointers to fitness and stats arrays
+    env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
+    env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
     # GAs['prey'].load_population_from_file('genes_9.pkl', 'prey')
     # GAs['predator'].load_population_from_file('genes_9.pkl', 'predator')
 
-    _lp.hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_genes(GAs, _lp.save_ID))
+    _lp.hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_genes({'prey': GA_prey, 'predator': GA_predator}, _lp.save_ID))
 
     for generation in range(_lp.number_of_generations):
-        models = {}
-        models['prey'] = _lp.NetworkModel(_brains['prey'].observations_vector_size, _lp.units, _brains['prey'].actions_vector_size, _brains['prey'].agents_count, batch_size=_lp.number_of_environments, use_bias=_lp.use_bias)
-        prey_weights = GAs['prey'].to_model()
-        models['prey'].build(prey_weights)
+        prey_genes = GA_prey.to_genes()
+        predator_genes = GA_predator.to_genes()
 
-        models['predator'] = _lp.NetworkModel(_brains['predator'].observations_vector_size, _lp.units, _brains['predator'].actions_vector_size, _brains['predator'].agents_count * _lp.number_of_environments, batch_size=1, use_bias=_lp.use_bias)
-        predator_weights = GAs['predator'].to_model()
-        models['predator'].build(predator_weights)
+        prey_genes_pointer = float(prey_genes.__array_interface__['data'][0])
+        predator_genes_pointer = float(predator_genes.__array_interface__['data'][0])
 
-        all_fitness = unity_environment.run_single_episode(models, _lp.number_of_steps, live_plot=live_plot)
+        # Evaluate genes
+        env_manager.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
+        env_manager.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
+        env_manager.run_single_episode()
 
-        for brain_name in _lp.brains:
-            if brain_name == 'prey':
-                fitness = np.mean(all_fitness[brain_name], axis=0)
-            else:
-                fitness = all_fitness[brain_name]
+        GA_prey.calc_fitness(prey_fitness)
+        GA_predator.calc_fitness(predator_fitness)
 
-            GAs[brain_name].calc_fitness(fitness)
+        if live_plot:
+            live_plot.update({'prey1': [np.average(prey_fitness), np.max(prey_fitness), np.min(prey_fitness)],
+                              'prey2': [prey_stats[0], prey_stats[2]],
+                              'prey3': [prey_stats[1], prey_stats[4]],
+                              'predator1': [np.average(predator_fitness), np.max(predator_fitness), np.min(predator_fitness)],
+                              'predator2': [predator_stats[1], predator_stats[2], predator_stats[3], predator_stats[4]]
+                              })
 
-            avg, max, min = np.average(fitness), np.max(fitness), np.min(fitness)
-            if live_plot:
-                live_plot.update({f'{brain_name}1': [avg, max, min], f'{brain_name}2': None})
+        # GA_prey.next_generation()
+        GA_predator.next_generation()
 
-        GAs['prey'].next_generation()
-        GAs['predator'].next_generation()
 
-    # unity_environment.close()
     if live_plot:
         live_plot.close()
 

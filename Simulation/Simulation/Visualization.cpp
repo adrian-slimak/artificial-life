@@ -82,18 +82,19 @@ void Visualization::pollEvents()
 
 void Visualization::updateSwarms()
 {
-	this->predator_swarm->model->y(0, 0) = 0;
-	this->predator_swarm->model->y(0, 1) = 0;
+	int me = 8;
+	this->prey_swarm->model->y(me, 0) = 0;
+	this->prey_swarm->model->y(me, 1) = 0;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-		this->predator_swarm->model->y(0, 1) = -1;
+		this->prey_swarm->model->y(me, 1) = -1;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		this->predator_swarm->model->y(0, 1) = 1;
+		this->prey_swarm->model->y(me, 1) = 1;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-		this->predator_swarm->model->y(0, 0) = 1;
+		this->prey_swarm->model->y(me, 0) = 1;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-		this->predator_swarm->model->y(0, 0) = -1;
+		this->prey_swarm->model->y(me, 0) = -1;
 
 	float x = 0;
 	float y = 0;
@@ -103,7 +104,7 @@ void Visualization::updateSwarms()
 		x = this->prey_swarm->position(i, 0) + 256.f;
 		y = this->prey_swarm->position(i, 1) + 256.f;
 		this->prey_sprites[i]->setPosition(x, y);
-		this->prey_sprites[i]->setRotation(this->prey_swarm->angle[i]);
+		this->prey_sprites[i]->setRotation(this->prey_swarm->angle[i] * rad2deg);
 	}
 
 	for (int i = 0; i < predator_swarm->population_size; i++)
@@ -134,11 +135,11 @@ void Visualization::renderSwarms()
 
 	//for (int i = 0; i < prey_swarm->population_size; i++)
 	//	if (prey_swarm->alive[i])
-	//		renderView(i, true);
+			renderView(8, true);
 
-	for (int i = 0; i < predator_swarm->population_size; i++)
-		if (predator_swarm->alive[i])
-			renderView(i, false);
+	//for (int i = 0; i < predator_swarm->population_size; i++)
+	//	if (predator_swarm->alive[i])
+	//		renderView(i, false);
 }
 
 void Visualization::renderView(int id, bool prey)
@@ -160,13 +161,13 @@ void Visualization::renderView(int id, bool prey)
 	{
 		x = prey_swarm->position(id, 0) + 256;
 		y = prey_swarm->position(id, 1) + 256;
-		arc_start = (prey_swarm->angle[id] - 91 * 0.0174533f);
+		arc_start = (prey_swarm->angle[id] - PreySwarm::vision_angle_half_rad);
 	}
 	else
 	{
 		x = predator_swarm->position(id, 0) + 256;
 		y = predator_swarm->position(id, 1) + 256;
-		arc_start = (predator_swarm->angle[id] - 91 * 0.0174533f);
+		arc_start = (predator_swarm->angle[id] - PreySwarm::vision_angle_half_rad);
 	}
 
 	sf::Vector2f pt0(x,y);
@@ -194,9 +195,9 @@ void Visualization::renderView(int id, bool prey)
 				convex.setFillColor(red);
 		}
 
-		a_rad = arc_start + i * 14 * 0.0174533f;
+		a_rad = arc_start + i * PreySwarm::vision_cell_angle_rad;
 		pt1 = sf::Vector2f(x + std::cos(a_rad) * PredatorSwarm::vision_range, y + std::sin(a_rad) * PredatorSwarm::vision_range);
-		a_rad = arc_start + (i + 1) * 14 * 0.0174533f;
+		a_rad = arc_start + (i + 1) * PreySwarm::vision_cell_angle_rad;
 		pt2 = sf::Vector2f(x + std::cos(a_rad) * PredatorSwarm::vision_range, y + std::sin(a_rad) * PredatorSwarm::vision_range);
 
 		convex.setPoint(1, pt1);

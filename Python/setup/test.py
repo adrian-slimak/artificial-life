@@ -16,7 +16,7 @@ predator_fitness_pointer = float(predator_fitness.__array_interface__['data'][0]
 prey_stats_pointer = float(prey_stats.__array_interface__['data'][0])
 predator_stats_pointer = float(predator_stats.__array_interface__['data'][0])
 
-EnvManager.set_parameters("OMGGG")
+EnvManager.set_parameters(r"C:\Users\adek1\source\repos\ArtificalLife\config.json")
 
 EM = EnvManager.EnvManager()
 EM.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
@@ -26,4 +26,5 @@ t = time()
 EM.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
 EM.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
 EM.run_single_episode()
+
 print(time()-t)

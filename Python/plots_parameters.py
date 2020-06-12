@@ -1,4 +1,4 @@
-from configs.learning_parameters import number_of_steps, number_of_generations
+from learning_parameters import number_of_steps, number_of_generations
 
 plot_size = (14, 6)  # Width / Height
 
@@ -12,25 +12,25 @@ plot_structure = \
                 'position': (0, 0),
                 'labels': ['episode', 'fitness'],
                 'lines': ['avg', 'best', 'worst'],
-                'lims': [number_of_generations, 200],
+                'lims': [number_of_generations, 210000],
+            },
+
+        'prey2':
+            {
+                'title': 'Prey mean stats',
+                'position': (0, 1),
+                'labels': ['step', 'value'],
+                'lines': ['survivorship', 'dispersion'],
+                'lims': [number_of_generations, 50],
             },
 
         'prey3':
             {
                 'title': 'Prey mean stats',
-                'position': (0, 1),
-                'labels': ['step', 'value'],
-                'lines': ['survivorship', 'density', 'dispersion', 'food'],
-                'lims': [number_of_generations, 60],
-            },
-
-        'prey2':
-            {
-                'title': 'Prey live stats',
                 'position': (0, 2),
                 'labels': ['step', 'value'],
-                'lines': ['alive', 'density', 'dispersion', 'food'],
-                'lims': [number_of_steps, 30],
+                'lines': ['density', 'food'],
+                'lims': [number_of_generations, 10],
             },
 
         'predator1':
@@ -39,25 +39,15 @@ plot_structure = \
                 'position': (1, 0),
                 'labels': ['episode', 'fitness'],
                 'lines': ['avg', 'best', 'worst'],
-                'lims': [number_of_generations, 40000]
+                'lims': [number_of_generations, 210000]
              },
 
-        'predator3':
+        'predator2':
             {
                 'title': 'Predator mean stats',
                 'position': (1, 1),
                 'labels': ['step', 'value'],
-                'lines': ['survivorship', 'density', 'dispersion', 'food', 'attacks'],
-                'lims': [number_of_generations, 30],
+                'lines': ['density', 'dispersion',  'attacks', 'hunts'],
+                'lims': [number_of_generations, 25],
             },
-
-        'predator2':
-            {
-                'title': 'Predator live stats',
-                'position': (1, 2),
-                'labels': ['step', 'value'],
-                'lines': ['alive', 'density', 'dispersion', 'food', 'attacks'],
-                'lims': [number_of_steps, 20],
-            },
-
     }

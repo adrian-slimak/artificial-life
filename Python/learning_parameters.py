@@ -1,41 +1,31 @@
-from configs.environment_parameters import environment_parameters as environment_parameters
-from configs.engine_configuration import engine_config as engine_configuration
 from other.hotkey_listener import HotKeyListener
-from networks.lstm import LSTMModel
-from networks.rnn import RNNModel
-from networks.dense import MLPModel
 from other.utils import save_parameters, current_save_ID
 
+config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
+results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
 
-# save_ID = current_save_ID()
+save_ID = current_save_ID()
 save_ID = 0
 hotkey_listener = HotKeyListener()
 hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_parameters(save_ID))
 
-
 # ENVIRONMENT PARAMETERS
-unity_environment_path = "C:/Users/adek1/Desktop/Env/ArtificalAnimals.exe"
-# unity_environment_path = None
-
-brains = [brain_name for brain_name in environment_parameters if ('count' in environment_parameters[brain_name] and environment_parameters[brain_name]['count'] > 0)]
-
 show_plots = True
-
-# GENERAL
-NetworkModel = RNNModel
-
-units = 8
-use_bias = True
 
 number_of_generations = 500
 number_of_steps = 4000
 
-# MULTI
-number_of_environments = 8
+prey_brain_cells = 8
+predator_brain_cells = 8
+
+prey_observations_size = 26
+predator_observations_size = 26
+prey_actions_size = 2
+predator_actions_size = 2
 
 # GENETIC ALGORITHM PARAMETERS
 # Population
-population_size = 60
+population_size = 100
 
 # Random Init
 init_min_genes = 0.7

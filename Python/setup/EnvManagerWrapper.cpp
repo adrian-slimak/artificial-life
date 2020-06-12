@@ -3,7 +3,7 @@
 //~ #include "structmember.h"
 #include <iostream>
 
-#include "../Simulation/EnvManager.h"
+#include "../../Simulation/Simulation/EnvManager.h"
 
 typedef struct {
     PyObject_HEAD

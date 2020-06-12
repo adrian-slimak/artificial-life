@@ -1,9 +1,71 @@
 {
+    "learning":
+    {
+      "population_size": 100,
+
+      "init_min_genes": 0.7,
+      "init_max_genes": 0.9,
+      "init_loc": 0,
+      "init_scale": 2,
+
+      // Selection
+      "selection_method": "Roulette Wheel",
+      //"selection_method": "Fittest Half",
+      //"selection_method": "Tournament",
+
+      //Crossover
+      "mating_method": "Two Points Per Part",
+      //"mating_method": "Two Points",
+      "max_percent_length": 0.5,
+
+      // Pairing
+      "pairing_method": "Fittest",
+
+      // Mutation
+      "gen_mutation_chance": 0.02,
+      "gen_deletion_chance": 0.01,
+      "gen_duplication_chance": 0.03
+    },
+
+    "environment":
+    {
+        "world_size": 512,
+		"simulation_steps": 4000,
+        "steps_without_predators": 3500,
+
+        "food":
+        {
+			"enabled": true,
+            "spawn_method": 1,   // 0 - Grid  1 - Random
+            "spawn_per_step": 0,  // 0.3
+            "spawn_amount_reset": 0,  // for Random Spawn # 200
+            "spawn_grid_step": 4  // for Grid Spawn
+        }
+    },
+
     "prey":
     {
-        "count": 52,
+        "count": 50,
+		
+		"brain_cells": 8,
+		"brain_type": "RNN",
 
-        "communication":
+        "move_speed": 1,
+        "turn_speed": 8,
+		
+		"actions_size": 2,
+		
+		"vision":
+		{
+			"cells": 13,
+			"angle": 182,
+			"range": 100
+		},
+
+        "eat_delay": 0,
+        "eat_range": 1,
+		
+		"communication":
         {
             "enabled": false,
             "food_sound_trigger": 8,  // Minimal number of food in 'vision' field to activate this sound
@@ -11,30 +73,15 @@
             "predator_sound_trigger": 1,  // Minimal number of predators in 'vision' field to activate this sound
             "predator_sound_value": 5
         },
-
-        "move_speed": 1,
-        "turn_speed": 8,
-
-        "eat_delay": 0,
-        "eat_range": 1,
-
-        "actions_vector_size": 2,
-
-		"vision":
-		{
-			"vector_size": 39,
-			"cell_number": 13,
-			"angle": 182,
-			"range": 100
-		},
 		
-		// "hearing":
-		//     {
-		//         "vector_size": 12,
-		//         "cell_number": 12,
-		//         "angle": 360,
-		//         "range": 40
-		//     },
+		"hearing":
+		 {
+			"enabled": false,
+			"vector_size": 12,
+			"cell_number": 12,
+			"angle": 360,
+			"range": 40
+		 },
 
         "energy":
         {
@@ -47,6 +94,31 @@
     "predator":
     {
         "count": 4,
+		
+		"brain_cells": 8,
+		"brain_type": "RNN",
+
+		
+		"move_speed": 3,
+        "turn_speed": 6,
+		
+		"actions_size": 2,
+		
+		"vision":
+		{
+			"cells": 13,
+			"angle": 182,
+			"range": 100
+		},
+		
+		"confusion_effect":
+        {
+            "ratio": 1,
+            "range": 30.0
+        },
+		
+        "eat_delay": 10,
+        "eat_range": 5.0,
 
         "communication":  // If enabled, 'actions_vector_size' will automatically increase by one
         {
@@ -54,56 +126,20 @@
             "sound_value": 3.5
         },
 
-        "move_speed": 3,
-        "turn_speed": 6,
-		
-        "eaet_delay": 10,
-        "eat_range": 5.0,
-
-        "actions_vector_size": 2,
-
-        "confusion_effect":
-        {
-            "ratio": 1,
-            "range": 30
-        },
-
-		"vision":
-		{
-			"vector_size": 39,
-			"cells": 13,
-			"angle": 182,
-			"range": 100
-		},
-
-		// "hearing":
-		//     {
-		//         "vector_size": 12,
-		//         "cell_number": 12,
-		//         "angle": 360,
-		//         "range": 40
-        //     },
+		"hearing":
+		 {
+			"enabled": false,
+			"vector_size": 12,
+			"cell_number": 12,
+			"angle": 360,
+			"range": 40
+		 },
 
         "energy":
         {
             "start_value": 125,
             "gain_per_eat": 50,
             "drain_per_step": 0
-        }
-    },
-
-    "environment":
-    {
-        "world_size": 512,
-		"simulation_steps": 4000,
-        "steps_without_predators": 0,
-		
-        "food":
-        {
-            "spawn_method": 1,   // 0 - Grid  1 - Random
-            "spawn_per_step": 0,  // 0.3
-            "spawn_amount_reset": 0,  // for Random Spawn # 200
-            "spawn_grid_step": 4  // for Grid Spawn
         }
     }
 }

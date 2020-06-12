@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "json11.hpp"
+#include "INetwork.h"
 
 EnvManager::EnvManager()
 {
@@ -27,7 +28,7 @@ void EnvManager::set_prey_genes(float* prey_genes, int genes_count, int genes_le
 	for (int i = 0; i < genes_count; i++)
         this->prey_genes[i] = prey_genes + i * genes_length;
 
-	this->prey_fitness = new float[genes_count];
+	//this->prey_fitness = new float[genes_count];
 	this->genes_count = genes_count;
 }
 
@@ -37,13 +38,13 @@ void EnvManager::set_predator_genes(float* predator_genes, int genes_count, int 
 	for (int i = 0; i < genes_count; i++)
 		this->predator_genes[i] = predator_genes + i * genes_length;
 
-	this->predator_fitness = new float[genes_count];
+	//this->predator_fitness = new float[genes_count];
 	this->genes_count = genes_count;
 }
 
-void EnvManager::set_fitness_pointers(float* prey_fintess, float* predator_fitness)
+void EnvManager::set_fitness_pointers(float* prey_fitess, float* predator_fitness)
 {
-    this->prey_fitness = prey_fintess;
+    this->prey_fitness = prey_fitess;
     this->predator_fitness = predator_fitness;
 }
 
@@ -59,6 +60,13 @@ void EnvManager::run_single_episode()
     srand(time(NULL));
 
 	int cycles = genes_count / num_envs;
+
+	// Reset stats
+	for (int i = 0; i < 5; i++)
+	{
+		prey_stats[i] = 0.f;
+		predator_stats[i] = 0.f;
+	}
 
     // Evaluate all Genotypes
 	for (int c = 0; c < cycles; c++)
@@ -80,15 +88,8 @@ void EnvManager::run_single_episode()
 		// Save fitness from envs
 		for (int n = 0; n < num_envs; n++)
 		{
-			prey_fitness[k+n] = simulations[n].prey_swarm->fitness;
-			predator_fitness[k+n] = simulations[n].predator_swarm->fitness;
-		}
-
-		// Save stats from envs
-        for (int n = 0; n < num_envs; n++)
-		{
-			prey_fitness[k+n] = simulations[n].prey_swarm->fitness;
-			predator_fitness[k+n] = simulations[n].predator_swarm->fitness;
+			this->prey_fitness[k+n] = simulations[n].prey_swarm->fitness;
+			this->predator_fitness[k+n] = simulations[n].predator_swarm->fitness;
 		}
 
         // Save stats from envs
@@ -106,6 +107,12 @@ void EnvManager::run_single_episode()
 			predator_stats[4] += simulations[n].predator_swarm->mean_hunts;
 		}
 	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		prey_stats[i] /= this->genes_count;
+		predator_stats[i] /= this->genes_count;
+	}
 }
 
 void EnvManager::set_parameters(const char *params_file_path)
@@ -117,47 +124,73 @@ void EnvManager::set_parameters(const char *params_file_path)
 	//std::cout << "k1: " << (float)json["prey"]["count"].number_value() << "\n";
 
 	PreySwarm::population_size = (int)json["prey"]["count"].number_value();
-	PreySwarm::brain_cells = 8;
-	PreySwarm::observations_size = 39;
-	PreySwarm::actions_size = (int)json["prey"]["actions_vector_size"].number_value();
+	PredatorSwarm::population_size = (int)json["predator"]["count"].number_value();
+
+	PreySwarm::brain_cells = (int)json["prey"]["brain_cells"].number_value();
+	PredatorSwarm::brain_cells = (int)json["predator"]["brain_cells"].number_value();
+	PreySwarm::network_type = json["prey"]["brain_type"].string_value() == "LSTM"? NetworkType::_LSTM : NetworkType::_RNN;
+	PredatorSwarm::network_type = json["predator"]["brain_type"].string_value() == "LSTM" ? NetworkType::_LSTM : NetworkType::_RNN;
+
+	PreySwarm::move_speed = (float)json["prey"]["move_speed"].number_value();
+	PreySwarm::turn_speed_rad = (float)json["prey"]["turn_speed"].number_value() * Distances::deg2rad;
+	PredatorSwarm::move_speed = (float)json["predator"]["move_speed"].number_value();
+	PredatorSwarm::turn_speed_rad = (float)json["predator"]["turn_speed"].number_value() * Distances::deg2rad;
 
 	PreySwarm::vision_range = (float)json["prey"]["vision"]["range"].number_value();
 	PreySwarm::vision_range_squared = PreySwarm::vision_range * PreySwarm::vision_range;
 	PreySwarm::vision_angle = (float)json["prey"]["vision"]["angle"].number_value();
-	PreySwarm::vision_angle_half = PreySwarm::vision_angle / 2.f;
+	PreySwarm::vision_angle_half_rad = (PreySwarm::vision_angle / 2.f) * Distances::deg2rad;
 	PreySwarm::vision_cells = (int)json["prey"]["vision"]["cells"].number_value();
-	PreySwarm::vision_cell_angle = (float)(PreySwarm::vision_angle / PreySwarm::vision_cells);
-
-	PreySwarm::eat_range = (float)json["prey"]["eat_range"].number_value();
-	PreySwarm::eat_delay = (float)json["prey"]["eat_delay"].number_value();
-
-	PreySwarm::move_speed = (float)json["prey"]["move_speed"].number_value();
-	PreySwarm::turn_speed_rad = (float)json["prey"]["turn_speed"].number_value() * Distances::deg2rad;
-
-	PredatorSwarm::population_size = (int)json["predator"]["count"].number_value();
-	PredatorSwarm::brain_cells = 8;
-	PredatorSwarm::observations_size = 39;
-	PredatorSwarm::actions_size = (int)json["predator"]["actions_vector_size"].number_value();
+	PreySwarm::vision_cell_angle_rad = (float)(PreySwarm::vision_angle / PreySwarm::vision_cells) * Distances::deg2rad;
 
 	PredatorSwarm::vision_range = (float)json["predator"]["vision"]["range"].number_value();
 	PredatorSwarm::vision_range_squared = PredatorSwarm::vision_range * PredatorSwarm::vision_range;
 	PredatorSwarm::vision_angle = (float)json["predator"]["vision"]["angle"].number_value();
-	PredatorSwarm::vision_angle_half = PredatorSwarm::vision_angle / 2.f;
+	PredatorSwarm::vision_angle_half_rad = (PredatorSwarm::vision_angle / 2.f) * Distances::deg2rad;
 	PredatorSwarm::vision_cells = (int)json["predator"]["vision"]["cells"].number_value();
-	PredatorSwarm::vision_cell_angle = (float)(PredatorSwarm::vision_angle / PredatorSwarm::vision_cells);
+	PredatorSwarm::vision_cell_angle_rad = (float)(PredatorSwarm::vision_angle / PredatorSwarm::vision_cells) * Distances::deg2rad;
 
+	PreySwarm::hear_enabled = json["prey"]["hearing"]["enabled"].bool_value();
+	PreySwarm::hear_range = (float)json["prey"]["hearing"]["range"].number_value();
+	PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
+	PreySwarm::hear_cells = (int)json["prey"]["hearing"]["cells"].number_value();
+	PreySwarm::hear_cell_angle_rad = (float)(360.0 / PreySwarm::vision_cells) * Distances::deg2rad;
+
+	PredatorSwarm::hear_enabled = json["predator"]["hearing"]["enabled"].bool_value();
+	PredatorSwarm::hear_range = (float)json["predator"]["hearing"]["range"].number_value();
+	PredatorSwarm::hear_range_squared = PredatorSwarm::hear_range * PredatorSwarm::hear_range;
+	PredatorSwarm::hear_cells = (int)json["predator"]["hearing"]["cells"].number_value();
+	PredatorSwarm::hear_cell_angle_rad = (float)(360.0 / PredatorSwarm::vision_cells) * Distances::deg2rad;
+
+	PreySwarm::communication_enabled = json["predator"]["communication"]["enabled"].bool_value();
+	PredatorSwarm::communication_enabled = json["predator"]["communication"]["enabled"].bool_value();
+
+	bool food_enabled = json["environment"]["food"]["enabled"].bool_value();
+	PreySwarm::observations_size = food_enabled? PreySwarm::vision_cells*3 : PreySwarm::vision_cells*2;
+	PredatorSwarm::observations_size = food_enabled ? PredatorSwarm::vision_cells*3 : PredatorSwarm::vision_cells*2;
+	if (PreySwarm::hear_enabled)
+		PreySwarm::observations_size += PreySwarm::hear_cells;
+	if (PredatorSwarm::hear_enabled)
+		PredatorSwarm::observations_size += PredatorSwarm::hear_cells;
+
+	PreySwarm::actions_size = (int)json["prey"]["actions_size"].number_value();
+	PredatorSwarm::actions_size = (int)json["predator"]["actions_size"].number_value();
+	if (PredatorSwarm::communication_enabled)
+		PredatorSwarm::actions_size += 1;
+
+	PreySwarm::eat_range = (float)json["prey"]["eat_range"].number_value();
+	PreySwarm::eat_delay = (int)json["prey"]["eat_delay"].number_value();
 	PredatorSwarm::eat_range = (float)json["predator"]["eat_range"].number_value();
+	PredatorSwarm::eat_range_squared = PredatorSwarm::eat_range*PredatorSwarm::eat_range;
 	PredatorSwarm::eat_delay = (int)json["predator"]["eat_delay"].number_value();
-
-	PredatorSwarm::move_speed = (float)json["predator"]["move_speed"].number_value();
-	PredatorSwarm::turn_speed_rad = (float)json["predator"]["turn_speed"].number_value() * Distances::deg2rad;
 
 	PredatorSwarm::confusion_range = (float)json["predator"]["confusion_effect"]["range"].number_value();
 	PredatorSwarm::confusion_range_squared = PredatorSwarm::confusion_range*PredatorSwarm::confusion_range;
 	PredatorSwarm::confusion_ratio = (float)json["predator"]["confusion_effect"]["ratio"].number_value();
 
+
 	Simulation::world_size = (float)json["environment"]["world_size"].number_value();
 	Simulation::world_size_half = Simulation::world_size / 2.f;
-	Simulation::simulation_steps = (float)json["environment"]["simulation_steps"].number_value();
+	Simulation::simulation_steps = (int)json["environment"]["simulation_steps"].number_value();
 	Simulation::steps_without_predators = (int)json["environment"]["steps_without_predators"].number_value();
 }
