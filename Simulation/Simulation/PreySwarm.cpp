@@ -39,17 +39,11 @@ PreySwarm::PreySwarm()
 {
 	alive = new bool[PreySwarm::population_size];
 
-	position = Eigen::MatrixXf(population_size, 2);
+	position = Eigen::ArrayXXf(PreySwarm::population_size, 2);
 
-	//float* temp2 = new float[PreySwarm::population_size * 2];
-	//position_2 = new float*[PreySwarm::population_size];
-	//for (int i = 0; i < PreySwarm::population_size; i++)
-	//	position_2[i] = temp2+(i*2);
+	norm = Eigen::ArrayXXf(PreySwarm::population_size, 2);
 
-	norm = new float*[PreySwarm::population_size];
-	for (int i = 0; i < PreySwarm::population_size; ++i)
-		norm[i] = new float[2];
-	angle = new float[PreySwarm::population_size];
+	angle = Eigen::ArrayXf(PreySwarm::population_size);
 
 	eat_delays = new int[PreySwarm::population_size];
 
@@ -63,11 +57,6 @@ PreySwarm::PreySwarm()
 
 PreySwarm::~PreySwarm()
 {
-	for (int i = 0; i < PreySwarm::population_size; ++i)
-		delete[] norm[i];
-	delete[] norm;
-
-	delete[] angle;
 
 	delete[] eat_delays;
 }
@@ -82,25 +71,16 @@ void PreySwarm::reset()
 	position *= Simulation::world_size_half;
 
 	//for (int i = 0; i < PreySwarm::population_size; i++)
-	//{
-	//	position_2[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-	//	position_2[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-	//}
-
-	//for (int i = 0; i < PreySwarm::population_size; i++)
-	//{
-	//	position_2[i][0] = position(i,0);
-	//	position_2[i][1] = position(i,1);
-	//}
-
-	for (int i = 0; i < PreySwarm::population_size; i++)
-		angle[i] = ((float)std::rand() / (RAND_MAX)) * 6.18f;
+	//	angle[i] = ((float)std::rand() / (RAND_MAX)) * 6.18f;
+	angle.setRandom();
+	angle += 1.f;
+	angle *= 3.14;
 
 	fitness = 0.f;
 	mean_density = 0.f;
 	mean_dispersion = 0.f;
 
-	for (int i=0; i<PreySwarm::population_size; i++)
+	for (int i = 0; i < PreySwarm::population_size; i++)
 		eat_delays[i] = 0;
 
 	this->model->reset();
@@ -160,33 +140,33 @@ void PreySwarm::update_stats()
 
 void PreySwarm::update_movement()
 {
-	float a;
-	float speed;
+	//for (int p = 0; p < population_size; p++)
+	//{
+	//	if (alive[p])
+	//	{
+	//		angle[p] += model->y(p, 1) * turn_speed_rad;
 
-	for (int p = 0; p < population_size; p++)
+	//		angle[p] = angle[p] < 0.0f ? angle[p] + 6.18f : angle[p] > 6.18f ? angle[p] - 6.18f : angle[p];
+
+	//		norm(p, 0) = std::cos(angle[p]);
+	//		norm(p, 1) = std::sin(angle[p]);
+
+	//		position.row(p) += norm.row(p) * model->y(p, 0) * move_speed;
+	//	}
+	//}
+
+
+	angle += model->y.col(1).array() * turn_speed_rad;
+
+	angle = angle.unaryExpr([](float elem)
 	{
-		if (alive[p])
-		{
-			angle[p] += model->y(p, 1) * turn_speed_rad;
+		return elem < 0.0f ? elem + 6.18f : elem > 6.18f ? elem - 6.18f : elem;
+	});
 
-			angle[p] = angle[p] < 0.0f ? angle[p] + 6.18f : angle[p] > 6.18f ? angle[p] - 6.18f : angle[p];
+	norm.col(0) = angle.cos();
+	norm.col(1) = angle.sin();
 
-			a = angle[p];
-			norm[p][0] = std::cos(a);
-			norm[p][1] = std::sin(a);
-
-			speed = model->y(p, 0) * move_speed;
-
-			position(p,0) += norm[p][0] * speed;
-			position(p,1) += norm[p][1] * speed;
-
-			/*position_2[p][0] += norm[p][0] * speed;
-			position_2[p][1] += norm[p][1] * speed;
-
-			position_2[p][0] = position_2[p][0] < -Simulation::world_size_half ? position_2[p][0] + Simulation::world_size : position_2[p][0] > Simulation::world_size_half ? position_2[p][0] - Simulation::world_size : position_2[p][0];
-			position_2[p][1] = position_2[p][1] < -Simulation::world_size_half ? position_2[p][1] + Simulation::world_size : position_2[p][1] > Simulation::world_size_half ? position_2[p][1] - Simulation::world_size : position_2[p][1];*/
-		}
-	}
+	position += norm.colwise() * model->y.col(0).array() * move_speed;
 
 	position = position.unaryExpr([](float elem)
 	{

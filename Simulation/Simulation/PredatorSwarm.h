@@ -45,10 +45,9 @@ public:
 	int number_alive;
 	bool *alive;
 
-	Eigen::ArrayXf position;
-	//float** position_2;
-	float** norm;
-	float* angle;
+	Eigen::ArrayXXf position;
+	Eigen::ArrayXXf norm;
+	Eigen::ArrayXf angle;
 
 	INetwork *model;
 

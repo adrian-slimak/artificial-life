@@ -13,7 +13,8 @@ public:
 	PreySwarm *prey_swarm = nullptr;
 	PredatorSwarm *predator_swarm = nullptr;
 
-	float** prey_distances;
+	Eigen::ArrayXf prey_distances;
+	//float** prey_distances;
 	float** predator_distances;
 	float** predator_prey_distances;
 	float** predator_prey_angles;

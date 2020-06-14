@@ -82,8 +82,8 @@ void Distances::recalculate_prey_distances_observations()
 
 	for (int a = 0; a < PreySwarm::population_size; a++)
 	{
-		norm_a_x = this->prey_swarm->norm[a][0];
-		norm_a_y = this->prey_swarm->norm[a][1];
+		norm_a_x = this->prey_swarm->norm(a, 0);
+		norm_a_y = this->prey_swarm->norm(a, 1);
 
 		for (int b = a + 1; b < PreySwarm::population_size; b++)
 		{
@@ -118,7 +118,7 @@ void Distances::recalculate_prey_distances_observations()
 				Ux *= -1;
 				Uy *= -1;
 
-				angle = std::atan2((Ux * this->prey_swarm->norm[b][1]) - (Uy * this->prey_swarm->norm[b][0]), (Ux * this->prey_swarm->norm[b][0]) + (Uy * this->prey_swarm->norm[b][1]));
+				angle = std::atan2((Ux * this->prey_swarm->norm(b, 1)) - (Uy * this->prey_swarm->norm(b, 0)), (Ux * this->prey_swarm->norm(b, 0)) + (Uy * this->prey_swarm->norm(b, 1)));
 
 				if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
 				{
@@ -153,8 +153,8 @@ void Distances::recalculate_prey_predator_distances_observations()
 	{
 		if (this->prey_swarm->alive[a])
 		{
-			norm_a_x = this->prey_swarm->norm[a][0];
-			norm_a_y = this->prey_swarm->norm[a][1];
+			norm_a_x = this->prey_swarm->norm(a, 0);
+			norm_a_y = this->prey_swarm->norm(a, 1);
 
 			// Update Preys with Preys
 			for (int b = a + 1; b < PreySwarm::population_size; b++)
@@ -192,7 +192,7 @@ void Distances::recalculate_prey_predator_distances_observations()
 						Ux *= -1;
 						Uy *= -1;
 
-						angle = std::atan2((Ux * this->prey_swarm->norm[b][1]) - (Uy * this->prey_swarm->norm[b][0]), (Ux * this->prey_swarm->norm[b][0]) + (Uy * this->prey_swarm->norm[b][1]));
+						angle = std::atan2((Ux * this->prey_swarm->norm(b, 1)) - (Uy * this->prey_swarm->norm(b, 0)), (Ux * this->prey_swarm->norm(b, 0)) + (Uy * this->prey_swarm->norm(b, 1)));
 
 						if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
 						{
@@ -240,7 +240,7 @@ void Distances::recalculate_prey_predator_distances_observations()
 
 				if (distance < PredatorSwarm::vision_range_squared)
 				{
-					angle = std::atan2((Ux * this->predator_swarm->norm[p][1]) - (Uy * this->predator_swarm->norm[p][0]), (Ux * this->predator_swarm->norm[p][0]) + (Uy * this->predator_swarm->norm[p][1]));
+					angle = std::atan2((Ux * this->predator_swarm->norm(p, 1)) - (Uy * this->predator_swarm->norm(p, 0)), (Ux * this->predator_swarm->norm(p, 0)) + (Uy * this->predator_swarm->norm(p, 1)));
 
 					predator_prey_angles[p][a] = angle;
 
@@ -260,8 +260,8 @@ void Distances::recalculate_prey_predator_distances_observations()
 	for (int a = 0; a < PredatorSwarm::population_size; a++)
 	{
 		// Get a direction vector (normalized)
-		norm_a_x = this->predator_swarm->norm[a][0];
-		norm_a_y = this->predator_swarm->norm[a][1];
+		norm_a_x = this->predator_swarm->norm(a, 0);
+		norm_a_y = this->predator_swarm->norm(a, 1);
 
 		// For each predator b...
 		for (int b = a + 1; b < PredatorSwarm::population_size; b++)
@@ -309,7 +309,7 @@ void Distances::recalculate_prey_predator_distances_observations()
 				Uy *= -1;
 
 				// Calculate angle between b and a
-				angle = std::atan2((Ux * this->predator_swarm->norm[b][1]) - (Uy * this->predator_swarm->norm[b][0]), (Ux * this->predator_swarm->norm[b][0]) + (Uy * this->predator_swarm->norm[b][1]));
+				angle = std::atan2((Ux * this->predator_swarm->norm(b, 1)) - (Uy * this->predator_swarm->norm(b, 0)), (Ux * this->predator_swarm->norm(b, 0)) + (Uy * this->predator_swarm->norm(b, 1)));
 
 				// Chech if a is in vision angle of b
 				if (std::abs(angle) < PredatorSwarm::vision_angle_half_rad)
