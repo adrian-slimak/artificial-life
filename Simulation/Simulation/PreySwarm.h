@@ -40,7 +40,8 @@ public:
 	int number_alive;
 	bool *alive;
 
-	float** position;
+	Eigen::MatrixXf position;
+	float** position_2;
 	float** norm;
 	float* angle;
 

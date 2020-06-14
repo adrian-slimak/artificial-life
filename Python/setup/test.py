@@ -23,8 +23,9 @@ EM.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
 EM.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
 t = time()
-EM.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
-EM.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
-EM.run_single_episode()
+for i in range(100):
+    EM.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
+    EM.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
+    EM.run_single_episode()
 
-print(time()-t)
+print((time()-t)/100.)

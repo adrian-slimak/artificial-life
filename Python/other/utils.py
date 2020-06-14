@@ -2,7 +2,7 @@ from pickle import dump
 from os import listdir
 import re
 
-results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
+results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/plots/"
 config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
 
 

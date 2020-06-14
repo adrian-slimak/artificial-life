@@ -30,8 +30,8 @@ public:
 
 	static bool communication_enabled;
 
-	static float eat_range;
-	static float eat_range_squared;
+	static float attack_range;
+	static float attack_range_squared;
 	static int attack_delay;
 
 	static float move_speed;
@@ -45,7 +45,8 @@ public:
 	int number_alive;
 	bool *alive;
 
-	float** position;
+	Eigen::MatrixXf position;
+	float** position_2;
 	float** norm;
 	float* angle;
 

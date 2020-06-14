@@ -14,7 +14,6 @@ public:
 	PredatorSwarm *predator_swarm = nullptr;
 
 	float** prey_distances;
-	float** prey_angles;
 	float** predator_distances;
 	float** predator_prey_distances;
 	float** predator_prey_angles;
@@ -27,6 +26,8 @@ public:
 
 	void recalculate_prey_distances_observations();
 	void recalculate_prey_predator_distances_observations();
+	void recalculate_prey_distances_observations_2();
+	void recalculate_prey_predator_distances_observations_2();
 };
 
 #endif

@@ -9,8 +9,8 @@
       "init_scale": 2,
 
       // Selection
-      "selection_method": "Roulette Wheel",
-      //"selection_method": "Fittest Half",
+//      "selection_method": "Roulette Wheel",
+      "selection_method": "Fittest Half",
       //"selection_method": "Tournament",
 
       //Crossover
