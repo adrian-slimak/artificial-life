@@ -32,7 +32,7 @@ public:
 
 	static float eat_range;
 	static float eat_range_squared;
-	static int eat_delay;
+	static int attack_delay;
 
 	static float move_speed;
 	static float turn_speed_rad;
@@ -45,9 +45,9 @@ public:
 	int number_alive;
 	bool *alive;
 
-	Eigen::MatrixXf position;
-	Eigen::MatrixXf norm;
-	Eigen::VectorXf angle;
+	float** position;
+	float** norm;
+	float* angle;
 
 	INetwork *model;
 
@@ -59,8 +59,7 @@ public:
 	int number_attacks;
 	int number_hunts;
 
-	Eigen::VectorXi target_id;
-	Eigen::VectorXi eat_delays;
+	int* attack_delays;
 
 	PreySwarm* prey_swarm;
 	Distances* distances;
@@ -68,7 +67,6 @@ public:
 	PredatorSwarm();
 	~PredatorSwarm();
 
-	void update_observations();
 	void update_decisions();
 	void update_movement();
 	void update_fitness();
@@ -76,9 +74,5 @@ public:
 	void try_hunt();
 	void reset();
 	void set_model(float* predator_genes);
-
-private:
-	float calculate_angle(int a, int b);
-	float calculate_angle_preys(int a, int b);
 };
 #endif

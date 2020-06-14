@@ -31,7 +31,7 @@
     {
         "world_size": 512,
 		"simulation_steps": 4000,
-        "steps_without_predators": 3500,
+        "steps_without_predators": 250,
 
         "food":
         {

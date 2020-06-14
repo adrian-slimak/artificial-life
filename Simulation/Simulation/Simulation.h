@@ -5,7 +5,7 @@
 #include "PreySwarm.h"
 #include "PredatorSwarm.h"
 #include "Distances.h"
-#include "Visualization.h"
+//#include "Visualization.h"
 
 #include <thread>
 
@@ -31,7 +31,7 @@ public:
 
 	Distances* distances = nullptr;
 
-	Visualization* visualization = nullptr;
+	//Visualization* visualization = nullptr;
 
 	Simulation();
 	Simulation(bool show_visualization);

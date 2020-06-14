@@ -1,8 +1,6 @@
 #ifndef DISTANCES_H
 #define DISTANCES_H
 
-#include <Eigen/Dense>
-
 class PreySwarm;
 class PredatorSwarm;
 
@@ -15,17 +13,20 @@ public:
 	PreySwarm *prey_swarm = nullptr;
 	PredatorSwarm *predator_swarm = nullptr;
 
-	Eigen::MatrixXf prey_distances;
-	Eigen::MatrixXf predator_distances;
-	Eigen::MatrixXf prey_predator_distances;
+	float** prey_distances;
+	float** prey_angles;
+	float** predator_distances;
+	float** predator_prey_distances;
+	float** predator_prey_angles;
 
 	Distances();
 	Distances(PreySwarm &prey_swarm, PredatorSwarm & predator_swarm);
 	~Distances();
 
-	void recalculate_prey_distances();
-	void recalculate_prey_predator_distances();
 	void reset();
+
+	void recalculate_prey_distances_observations();
+	void recalculate_prey_predator_distances_observations();
 };
 
 #endif

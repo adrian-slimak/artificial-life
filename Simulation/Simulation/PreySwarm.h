@@ -40,17 +40,15 @@ public:
 	int number_alive;
 	bool *alive;
 
-	Eigen::MatrixXf position;
-	Eigen::MatrixXf norm;
-	Eigen::VectorXf angle;
+	float** position;
+	float** norm;
+	float* angle;
 
 	float fitness;
 	float mean_density;
 	float mean_dispersion;
 
-	Eigen::MatrixXi target_id;
-
-	Eigen::MatrixXi eat_delays;
+	int* eat_delays;
 
 	INetwork *model;
 
@@ -60,18 +58,11 @@ public:
 	PreySwarm();
 	~PreySwarm();
 
-	void update_observations_preys();
-	void update_observations();
 	void update_decisions();
 	void update_movement();
 	void update_fitness();
 	void update_stats();
 	void reset();
 	void set_model(float* prey_genes);
-	void recalculate_prey_distances_observations();
-
-private:
-	float calculate_angle(int a, int b);
-	float calculate_angle_predators(int a, int b);
 };
 #endif

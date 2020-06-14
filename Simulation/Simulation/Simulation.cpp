@@ -33,7 +33,7 @@ Simulation::Simulation(bool show_visualization)
 	this->predator_swarm->prey_swarm = prey_swarm;
 	this->predator_swarm->distances = distances;
 
-	if (show_visualization) visualization = new Visualization(*prey_swarm, *predator_swarm);
+	//if (show_visualization) visualization = new Visualization(*prey_swarm, *predator_swarm);
 }
 
 Simulation::~Simulation()
@@ -67,24 +67,13 @@ void Simulation::runSingleEpisode()
 	// Warmup without predators
 	while (step < steps_without_predators)
 	{
-		this->distances->recalculate_prey_distances();
-		this->prey_swarm->update_observations_preys();
-		Eigen::MatrixXf C(this->prey_swarm->model->x.rows(), this->prey_swarm->model->x.cols());
-		C = this->prey_swarm->model->x;
-		this->prey_swarm->recalculate_prey_distances_observations();
-
-		bool flag = true;
-		for (int x = 0; x < this->prey_swarm->model->x.rows(); x++)
-			for (int y = 0; y < this->prey_swarm->model->x.cols(); y++)
-				if (this->prey_swarm->model->x(x, y) != C(x, y))
-					flag = false;
-		std::cout << flag << std::endl;
+		this->distances->recalculate_prey_distances_observations();
 
 		this->prey_swarm->update_decisions();
 
 		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
 
-		if (visualization) visualization->render();
+		//if (visualization) visualization->render();
 
 		this->prey_swarm->update_movement();
 
@@ -96,9 +85,8 @@ void Simulation::runSingleEpisode()
 	// Main simulation loop
 	while (step < simulation_steps)
 	{
-		this->distances->recalculate_prey_predator_distances();
-		this->prey_swarm->update_observations();
-		this->predator_swarm->update_observations();
+		this->distances->recalculate_prey_predator_distances_observations();
+		this->predator_swarm->try_hunt(); // Przed update stats???
 
 		prey_swarm->update_decisions();
 		predator_swarm->update_decisions();
@@ -106,9 +94,8 @@ void Simulation::runSingleEpisode()
 		this->prey_swarm->update_stats();
 		this->predator_swarm->update_stats();
 
-		if (visualization) visualization->render();
+		//if (visualization) visualization->render();
 
-		this->predator_swarm->try_hunt();
 		this->predator_swarm->update_movement();
 		this->prey_swarm->update_movement();
 

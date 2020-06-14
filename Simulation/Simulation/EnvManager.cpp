@@ -182,7 +182,7 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PreySwarm::eat_delay = (int)json["prey"]["eat_delay"].number_value();
 	PredatorSwarm::eat_range = (float)json["predator"]["eat_range"].number_value();
 	PredatorSwarm::eat_range_squared = PredatorSwarm::eat_range*PredatorSwarm::eat_range;
-	PredatorSwarm::eat_delay = (int)json["predator"]["eat_delay"].number_value();
+	PredatorSwarm::attack_delay = (int)json["predator"]["eat_delay"].number_value();
 
 	PredatorSwarm::confusion_range = (float)json["predator"]["confusion_effect"]["range"].number_value();
 	PredatorSwarm::confusion_range_squared = PredatorSwarm::confusion_range*PredatorSwarm::confusion_range;

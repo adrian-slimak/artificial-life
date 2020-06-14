@@ -37,14 +37,17 @@ float PreySwarm::turn_speed_rad = 8.f * Distances::deg2rad;
 
 PreySwarm::PreySwarm()
 {
-	alive = new bool[population_size];
+	alive = new bool[PreySwarm::population_size];
 
-	position = Eigen::MatrixXf(population_size, 2);
-	norm = Eigen::MatrixXf(population_size, 2);
-	angle = Eigen::VectorXf(population_size);
+	position = new float*[PreySwarm::population_size];
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+		position[i] = new float[2];
+	norm = new float*[PreySwarm::population_size];
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+		norm[i] = new float[2];
+	angle = new float[PreySwarm::population_size];
 
-	target_id = Eigen::VectorXi(population_size);
-	eat_delays = Eigen::VectorXi(population_size);
+	eat_delays = new int[PreySwarm::population_size];
 
 	if (network_type == NetworkType::_LSTM)
 		this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
@@ -56,6 +59,17 @@ PreySwarm::PreySwarm()
 
 PreySwarm::~PreySwarm()
 {
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+		delete[] position[i];
+	delete[] position;
+
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+		delete[] norm[i];
+	delete[] norm;
+
+	delete[] angle;
+
+	delete[] eat_delays;
 }
 
 void PreySwarm::reset()
@@ -64,18 +78,21 @@ void PreySwarm::reset()
 	for (int i = 0; i < population_size; i++)
 		alive[i] = true;
 
-	position.setRandom();
-	position *= Simulation::world_size_half;
-	angle.setRandom();
-	angle += Eigen::VectorXf::Constant(population_size, 1.);
-	angle *= 3.14f;
+	//for (int i = 0; i < PredatorSwarm::population_size; i++)
+	//{
+	//	position[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//	position[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//}
+
+	//for (int i = 0; i < PreySwarm::population_size; i++)
+	//	angle[i] = ((double)std::rand() / (RAND_MAX)) * 6.18f;
 
 	fitness = 0.f;
 	mean_density = 0.f;
 	mean_dispersion = 0.f;
 
-	target_id.setConstant(-1);
-	eat_delays.setConstant(0);
+	for (int i=0; i<PreySwarm::population_size; i++)
+		eat_delays[i] = 0;
 
 	this->model->reset();
 }
@@ -83,189 +100,6 @@ void PreySwarm::reset()
 void PreySwarm::set_model(float* prey_genes)
 {
 	this->model->build(prey_genes);
-}
-
-void PreySwarm::update_observations_preys()
-{
-	model->x.setConstant(1000000.f);
-
-	for (int self_id = 0; self_id < population_size; self_id++)
-	{
-		//if (alive[self_id])
-		{
-			// PREYS WITH PREYS
-			for (int prey_id = 0; prey_id < population_size; prey_id++)
-			{
-				//if (alive[prey_id] && self_id != prey_id)
-				if (self_id != prey_id)
-				{
-					if (distances->prey_distances(self_id, prey_id) < vision_range_squared)
-					{
-						float angle = calculate_angle(self_id, prey_id);
-						if (std::abs(angle) < vision_angle_half_rad)
-						{
-							int obs_id = int((vision_angle_half_rad - angle) / vision_cell_angle_rad);
-							if (distances->prey_distances(self_id, prey_id) < model->x(self_id, obs_id))
-								model->x(self_id, obs_id) = distances->prey_distances(self_id, prey_id);
-						}
-					}
-				}
-			}
-
-			model->x.row(self_id) = model->x.row(self_id).unaryExpr([this](float elem)
-			{
-				return elem == 1000000.f ? 0.0f : std::sqrt(elem) / vision_range;
-			});
-		}
-	}
-	// Czy da siÄ™ to przyzpieszyÄ‡?? UnaryExpr, biorÄ…c indeks i wykonujÄ…c powyÅ¼sze w ten sposÃ³b;
-}
-
-void PreySwarm::update_observations()
-{
-	model->x.setConstant(1000000.f);
-
-	//float target_closest;
-
-	for (int self_id = 0; self_id < population_size; self_id++)
-	{
-		if (alive[self_id])
-		{
-			// PREYS WITH PREYS
-			for (int prey_id = 0; prey_id < population_size; prey_id++)
-			{
-				if (alive[prey_id] && self_id!=prey_id)
-				{
-					if (distances->prey_distances(self_id, prey_id) < vision_range_squared)
-					{
-						float angle = calculate_angle(self_id, prey_id);
-						if (std::abs(angle) < vision_angle_half_rad)
-						{
-							int obs_id = int((vision_angle_half_rad - angle) / vision_cell_angle_rad);
-							if (distances->prey_distances(self_id, prey_id) < model->x(self_id, obs_id))
-								model->x(self_id, obs_id) = distances->prey_distances(self_id, prey_id);
-						}
-					}
-				}
-			}
-
-			//PREYS WITH PREDATORS
-			for (int predator_id = 0; predator_id < predator_swarm->population_size; predator_id++)
-			{
-				if (predator_swarm->alive[predator_id])
-				{
-					if (distances->prey_predator_distances(self_id, predator_id) < vision_range_squared)
-					{
-						float angle = calculate_angle_predators(self_id, predator_id);
-						if (std::abs(angle) < vision_angle_half_rad)
-						{
-							int obs_id = int((vision_angle_half_rad - angle) / vision_cell_angle_rad) + vision_cells;
-							if (distances->prey_predator_distances(self_id, predator_id) < model->x(self_id, obs_id))
-								model->x(self_id, obs_id) = distances->prey_predator_distances(self_id, predator_id);
-						}
-					}
-				}
-			}
-
-			model->x.row(self_id) = model->x.row(self_id).unaryExpr([this](float elem)
-			{
-				return elem == 1000000.f ? 0.0f : std::sqrt(elem) / vision_range;
-			});
-		}
-	}
-}
-
-void PreySwarm::recalculate_prey_distances_observations()
-{
-	model->x.setConstant(1000000.f);
-
-	float Ux;
-	float Uy;
-	float d;
-	float _a;
-	int obs_id;
-
-	for (int a = 0; a < PreySwarm::population_size; a++)
-	{
-		for (int b = a + 1; b < PreySwarm::population_size; b++)
-		{
-			Ux = this->position(b, 0) - this->position(a, 0);
-			Uy = this->position(b, 1) - this->position(a, 1);
-
-			if (Ux > Simulation::world_size_half)
-				Ux -= Simulation::world_size;
-			else if (Ux < -Simulation::world_size_half)
-				Ux += Simulation::world_size;
-			if (Uy > Simulation::world_size_half)
-				Uy -= Simulation::world_size;
-			else if (Uy < -Simulation::world_size_half)
-				Uy += Simulation::world_size;
-			d = Ux * Ux + Uy * Uy;
-
-			if (d < PreySwarm::vision_range_squared)
-			{
-				_a = std::atan2((Ux * this->norm(a, 1)) - (Uy * this->norm(a, 0)), (Ux * this->norm(a, 0)) + (Uy * this->norm(a, 1)));
-
-				if (std::abs(_a) < vision_angle_half_rad)
-				{
-					obs_id = int((vision_angle_half_rad - _a) / vision_cell_angle_rad);
-					if (d < model->x(a, obs_id))
-						model->x(a, obs_id) = d;
-				}
-
-				Ux *= -1;
-				Uy *= -1;
-
-				_a = std::atan2((Ux * this->norm(b, 1)) - (Uy * this->norm(b, 0)), (Ux * this->norm(b, 0)) + (Uy * this->norm(b, 1)));
-
-				if (std::abs(_a) < vision_angle_half_rad)
-				{
-					obs_id = int((vision_angle_half_rad - _a) / vision_cell_angle_rad);
-					if (d < model->x(b, obs_id))
-						model->x(b, obs_id) = d;
-				}
-			}
-		}
-	}
-
-	model->x = model->x.unaryExpr([this](float elem)
-	{
-		return elem == 1000000.f ? 0.0f : std::sqrt(elem) / vision_range;
-	});
-}
-
-float PreySwarm::calculate_angle(int a, int b)
-{
-	float Ux = position(b, 0) - position(a, 0);
-	float Uy = position(b, 1) - position(a, 1);
-
-	if (Ux > Simulation::world_size_half)
-		Ux -= Simulation::world_size;
-	else if (Ux < -Simulation::world_size_half)
-		Ux += Simulation::world_size;
-	if (Uy > Simulation::world_size_half)
-		Uy -= Simulation::world_size;
-	else if (Uy < -Simulation::world_size_half)
-		Uy += Simulation::world_size;
-
-	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a, 0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1)));
-}
-
-float PreySwarm::calculate_angle_predators(int a, int b)
-{
-	float Ux = predator_swarm->position(b, 0) - position(a, 0);
-	float Uy = predator_swarm->position(b, 1) - position(a, 1);
-
-	if (Ux > Simulation::world_size_half)
-		Ux -= Simulation::world_size;
-	else if (Ux < -Simulation::world_size_half)
-		Ux += Simulation::world_size;
-	if (Uy > Simulation::world_size_half)
-		Uy -= Simulation::world_size;
-	else if (Uy < -Simulation::world_size_half)
-		Uy += Simulation::world_size;
-
-	return std::atan2((Ux * norm(a, 1)) - (Uy * norm(a,0)), (Ux * norm(a, 0)) + (Uy * norm(a, 1)));
 }
 
 void PreySwarm::update_decisions()
@@ -283,27 +117,28 @@ void PreySwarm::update_stats()
 {
 	int density = 0;
 	float dispersion = 0.f;
-	float temp2;
+	float min_dist;
 
+	// Tutaj te¿ da siê przyspieszyæ, poniewa¿ a->b oraz b->a to ten sam dystans...
 	for (int self_id = 0; self_id < population_size; self_id++)
 	{
 		if (alive[self_id])
 		{
-			temp2 = 1000000.f;
+			min_dist = 1000000.f;
 
 			for (int prey_id = 0; prey_id < population_size; prey_id++)
 			{
 				if (alive[prey_id] && self_id != prey_id)
 				{
-					if (this->distances->prey_distances(self_id, prey_id) < 900.f)
+					if (this->distances->prey_distances[self_id][prey_id] < 900.f)
 						density++;
 
-					if (this->distances->prey_distances(self_id, prey_id) < temp2)
-						temp2 = this->distances->prey_distances(self_id, prey_id);
+					if (this->distances->prey_distances[self_id][prey_id] < min_dist)
+						min_dist = this->distances->prey_distances[self_id][prey_id];
 				}
 			}
 
-			dispersion += std::sqrt(temp2);
+			dispersion += std::sqrt(min_dist);
 		}
 	}
 
@@ -312,58 +147,35 @@ void PreySwarm::update_stats()
 		this->mean_density += (density / (float)number_alive);
 		this->mean_dispersion += (dispersion / (float)number_alive);
 	}
-	//else
-	//{
-	//	this->mean_density += 0.f;
-	//	this->mean_dispersion += 0.f;
-	//}
 }
 
 void PreySwarm::update_movement()
 {
-	for (int prey_id = 0; prey_id < population_size; prey_id++)
+	float a;
+	float speed;
+	float x;
+	float y;
+
+	for (int p = 0; p < population_size; p++)
 	{
-		if (alive[prey_id])
+		if (alive[p])
 		{
-			angle(prey_id) += model->y(prey_id, 1) * turn_speed_rad;
+			angle[p] += model->y(p, 1) * turn_speed_rad;
 
-			angle(prey_id) = angle(prey_id) < 0.0f ? angle(prey_id) + 6.18f : angle(prey_id) > 6.18f ? angle(prey_id) - 6.18f : angle(prey_id);
+			angle[p] = angle[p] < 0.0f ? angle[p] + 6.18f : angle[p] > 6.18f ? angle[p] - 6.18f : angle[p];
 
-			float a = angle(prey_id);
-			norm(prey_id, 0) = std::cos(a);
-			norm(prey_id, 1) = std::sin(a);
+			a = angle[p];
+			norm[p][0] = std::cos(a);
+			norm[p][1] = std::sin(a);
 
-			position.row(prey_id) += norm.row(prey_id) * model->y(prey_id, 0) * move_speed;
+			speed = model->y(p, 0) * move_speed;
+			position[p][0] += norm[p][0] * speed;
+			position[p][1] += norm[p][1] * speed;
 
-			position.row(prey_id) = position.row(prey_id).unaryExpr([](float elem)
-			{
-				return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
-			});
+			x = position[p][0];
+			y = position[p][1];
+			position[p][0] = x < -Simulation::world_size_half ? x + Simulation::world_size : x > Simulation::world_size_half ? x - Simulation::world_size : x;
+			position[p][1] = y < -Simulation::world_size_half ? y + Simulation::world_size : y > Simulation::world_size_half ? y- Simulation::world_size : y;
 		}
 	}
-
-	//angle += model->y.col(1) * turn_speed;
-
-	//angle = angle.unaryExpr([](float elem)
-	//{
-	//	return elem < 0.0 ? elem + 360.0 : elem > 360.0 ? elem - 360.0 : elem;
-	//});
-
-	//norm.col(0) = Distances::deg2rad * angle.unaryExpr([](float elem)
-	//{
-	//	return std::cos(elem);
-	//});
-
-	//norm.col(1) = Distances::deg2rad * angle.unaryExpr([](float elem)
-	//{
-	//	return std::sin(elem);
-	//});
-
-	//position.col(0) += norm.col(0).cwiseProduct(model->y.col(0)) * move_speed;
-	//position.col(1) += norm.col(1).cwiseProduct(model->y.col(1)) * move_speed;
-
-	//position = position.unaryExpr([](float elem)
-	//{
-	//	return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
-	//});
 }

@@ -9,28 +9,28 @@ int main()
 	srand(time(NULL));
 
 	EnvManager::set_parameters("C:/Users/adek1/source/repos/ArtificalLife/config.json");
-	Simulation sim = Simulation(true);
-	sim.runSingleEpisode();
+	//Simulation sim = Simulation(true);
+	//sim.runSingleEpisode();
 
-	//std::vector<Simulation> simulations;
+	std::vector<Simulation> simulations;
 
-	//for (int i = 0; i < 10; i++)
-	//	simulations.push_back(Simulation(false));
+	for (int i = 0; i < 10; i++)
+		simulations.push_back(Simulation(false));
 
-	//auto start = std::chrono::system_clock::now();
-	//
-	//for (int s = 0; s < 10; s++)
-	//{
-	//	for (int i = 0; i < 10; i++)
-	//		simulations[i].runInThread();
+	auto start = std::chrono::system_clock::now();
+	
+	for (int s = 0; s < 10; s++)
+	{
+		for (int i = 0; i < 10; i++)
+			simulations[i].runInThread();
 
-	//	for (int i = 0; i < 10; i++)
-	//		simulations[i].threadJoin();
-	//}
+		for (int i = 0; i < 10; i++)
+			simulations[i].threadJoin();
+	}
 
-	//auto stop = std::chrono::system_clock::now();
-	//double elapsed_secs = std::chrono::duration<double>{stop - start}.count();
-	//std::cout << "Time taken : " << elapsed_secs << std::endl;
+	auto stop = std::chrono::system_clock::now();
+	double elapsed_secs = std::chrono::duration<double>{stop - start}.count();
+	std::cout << "Time taken : " << elapsed_secs << std::endl;
 
 	std::cin.get();
 }
