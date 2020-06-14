@@ -26,8 +26,5 @@ public:
 
 	void recalculate_prey_distances_observations();
 	void recalculate_prey_predator_distances_observations();
-	void recalculate_prey_distances_observations_2();
-	void recalculate_prey_predator_distances_observations_2();
 };
-
 #endif

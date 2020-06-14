@@ -41,10 +41,10 @@ PreySwarm::PreySwarm()
 
 	position = Eigen::MatrixXf(population_size, 2);
 
-	float* temp2 = new float[PreySwarm::population_size * 2];
-	position_2 = new float*[PreySwarm::population_size];
-	for (int i = 0; i < PreySwarm::population_size; i++)
-		position_2[i] = temp2+(i*2);
+	//float* temp2 = new float[PreySwarm::population_size * 2];
+	//position_2 = new float*[PreySwarm::population_size];
+	//for (int i = 0; i < PreySwarm::population_size; i++)
+	//	position_2[i] = temp2+(i*2);
 
 	norm = new float*[PreySwarm::population_size];
 	for (int i = 0; i < PreySwarm::population_size; ++i)
@@ -78,14 +78,14 @@ void PreySwarm::reset()
 	for (int i = 0; i < population_size; i++)
 		alive[i] = true;
 
-	//position.setRandom();
-	//position *= Simulation::world_size_half;
+	position.setRandom();
+	position *= Simulation::world_size_half;
 
-	for (int i = 0; i < PreySwarm::population_size; i++)
-	{
-		position_2[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-		position_2[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-	}
+	//for (int i = 0; i < PreySwarm::population_size; i++)
+	//{
+	//	position_2[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//	position_2[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//}
 
 	//for (int i = 0; i < PreySwarm::population_size; i++)
 	//{
@@ -162,8 +162,6 @@ void PreySwarm::update_movement()
 {
 	float a;
 	float speed;
-	float x;
-	float y;
 
 	for (int p = 0; p < population_size; p++)
 	{
@@ -179,29 +177,19 @@ void PreySwarm::update_movement()
 
 			speed = model->y(p, 0) * move_speed;
 
-			//position(p,0) += norm[p][0] * speed;
-			//position(p,1) += norm[p][1] * speed;
+			position(p,0) += norm[p][0] * speed;
+			position(p,1) += norm[p][1] * speed;
 
-			//position.row(p) = position.row(p).unaryExpr([](float elem)
-			//{
-			//	return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
-			//});
-
-			position_2[p][0] += norm[p][0] * speed;
+			/*position_2[p][0] += norm[p][0] * speed;
 			position_2[p][1] += norm[p][1] * speed;
 
-			if (position_2[p][0] > Simulation::world_size_half)
-				position_2[p][0] += Simulation::world_size;
-			else if (position_2[p][0] < -Simulation::world_size_half)
-				position_2[p][0] -= Simulation::world_size_half;
-
-			if (position_2[p][1] > Simulation::world_size_half)
-				position_2[p][1] += Simulation::world_size;
-			else if (position_2[p][1] < -Simulation::world_size_half)
-				position_2[p][1] -= Simulation::world_size_half;
-
-			/*position_2[p][0] = position_2[p][0] < -Simulation::world_size_half ? position_2[p][0] + Simulation::world_size : position_2[p][0] > Simulation::world_size_half ? position_2[p][0] - Simulation::world_size : position_2[p][0];
-			position_2[p][1] = position_2[p][1] < -Simulation::world_size_half ? position_2[p][1] + Simulation::world_size : position_2[p][1] > Simulation::world_size_half ? position_2[p][1] - Simulation::world_size : position_2[p][1];
-		*/}
+			position_2[p][0] = position_2[p][0] < -Simulation::world_size_half ? position_2[p][0] + Simulation::world_size : position_2[p][0] > Simulation::world_size_half ? position_2[p][0] - Simulation::world_size : position_2[p][0];
+			position_2[p][1] = position_2[p][1] < -Simulation::world_size_half ? position_2[p][1] + Simulation::world_size : position_2[p][1] > Simulation::world_size_half ? position_2[p][1] - Simulation::world_size : position_2[p][1];*/
+		}
 	}
+
+	position = position.unaryExpr([](float elem)
+	{
+		return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
+	});
 }

@@ -46,10 +46,10 @@ PredatorSwarm::PredatorSwarm()
 
 	position = Eigen::MatrixXf(population_size, 2);
 
-	float* temp2 = new float[PredatorSwarm::population_size * 2];
-	position_2 = new float*[PredatorSwarm::population_size];
-	for (int i = 0; i < PredatorSwarm::population_size; i++)
-		position_2[i] = temp2+(i*2);
+	//float* temp2 = new float[PredatorSwarm::population_size * 2];
+	//position_2 = new float*[PredatorSwarm::population_size];
+	//for (int i = 0; i < PredatorSwarm::population_size; i++)
+	//	position_2[i] = temp2+(i*2);
 
 	norm = new float*[PredatorSwarm::population_size];
 	for (int i = 0; i < PredatorSwarm::population_size; ++i)
@@ -84,21 +84,20 @@ void PredatorSwarm::reset()
 	for (int i = 0; i < population_size; i++)
 		alive[i] = true;
 
-	//position.setRandom();
-	//position *= Simulation::world_size_half;
+	position.setRandom();
+	position *= Simulation::world_size_half;
 
-	for (int i = 0; i < PredatorSwarm::population_size; i++)
-	{
-		position_2[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-		position_2[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
-	}
+	//for (int i = 0; i < PredatorSwarm::population_size; i++)
+	//{
+	//	position_2[i][0] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//	position_2[i][1] = ((float)std::rand() / (RAND_MAX)) * Simulation::world_size - Simulation::world_size_half;
+	//}
 
 	//for (int i = 0; i < PredatorSwarm::population_size; i++)
 	//{
 	//	position_2[i][0] = position(i,0);
 	//	position_2[i][1] = position(i,0);
 	//}
-
 	for (int i = 0; i < PredatorSwarm::population_size; i++)
 		angle[i] = ((float)std::rand() / (RAND_MAX)) * 6.18f;
 
@@ -161,6 +160,7 @@ void PredatorSwarm::update_stats()
 	}
 }
 
+
 void PredatorSwarm::update_movement()
 {
 	float a;
@@ -180,31 +180,31 @@ void PredatorSwarm::update_movement()
 
 			speed = model->y(p, 0) * move_speed;
 
-			//position(p, 0) += norm[p][0] * speed;
-			//position(p, 1) += norm[p][1] * speed;
+			position(p, 0) += norm[p][0] * speed;
+			position(p, 1) += norm[p][1] * speed;
 
-			//position.row(p) = position.row(p).unaryExpr([](float elem)
-			//{
-			//	return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
-			//});
+			//position_2[p][0] += norm[p][0] * speed;
+			//position_2[p][1] += norm[p][1] * speed;
 
-			position_2[p][0] += norm[p][0] * speed;
-			position_2[p][1] += norm[p][1] * speed;
+			//if (position_2[p][0] > Simulation::world_size_half)
+			//	position_2[p][0] -= Simulation::world_size;
+			//else if (position_2[p][0] < -Simulation::world_size_half)
+			//	position_2[p][0] += Simulation::world_size;
 
-			if (position_2[p][0] > Simulation::world_size_half)
-				position_2[p][0] += Simulation::world_size;
-			else if (position_2[p][0] < -Simulation::world_size_half)
-				position_2[p][0] -= Simulation::world_size_half;
-
-			if (position_2[p][1] > Simulation::world_size_half)
-				position_2[p][1] += Simulation::world_size;
-			else if (position_2[p][1] < -Simulation::world_size_half)
-				position_2[p][1] -= Simulation::world_size_half;
+			//if (position_2[p][1] > Simulation::world_size_half)
+			//	position_2[p][1] -= Simulation::world_size;
+			//else if (position_2[p][1] < -Simulation::world_size_half)
+			//	position_2[p][1] += Simulation::world_size;
 
 			//position_2[p][0] = position_2[p][0] < -Simulation::world_size_half ? position_2[p][0] + Simulation::world_size : position_2[p][0] > Simulation::world_size_half ? position_2[p][0] - Simulation::world_size : position_2[p][0];
 			//position_2[p][1] = position_2[p][1] < -Simulation::world_size_half ? position_2[p][1] + Simulation::world_size : position_2[p][1] > Simulation::world_size_half ? position_2[p][1] - Simulation::world_size : position_2[p][1];
 		}
 	}
+
+	position = position.unaryExpr([](float elem)
+	{
+		return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
+	});
 }
 
 void PredatorSwarm::try_hunt()

@@ -67,8 +67,7 @@ void Simulation::runSingleEpisode()
 	// Warmup without predators
 	while (step < steps_without_predators)
 	{
-		//this->distances->recalculate_prey_distances_observations();
-		this->distances->recalculate_prey_distances_observations_2();
+		this->distances->recalculate_prey_distances_observations();
 
 		this->prey_swarm->update_decisions();
 
@@ -86,8 +85,7 @@ void Simulation::runSingleEpisode()
 	// Main simulation loop
 	while (step < simulation_steps)
 	{
-		//this->distances->recalculate_prey_predator_distances_observations();
-		this->distances->recalculate_prey_predator_distances_observations_2();
+		this->distances->recalculate_prey_predator_distances_observations();
 		this->predator_swarm->try_hunt(); // Przed update stats???
 
 		prey_swarm->update_decisions();
