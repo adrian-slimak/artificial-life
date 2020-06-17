@@ -18,7 +18,6 @@ Distances::Distances(PreySwarm &prey_swarm, PredatorSwarm &predator_swarm)
 	this->predator_swarm = &predator_swarm;
 
 	//Initialize prey->prey distances table
-	//Initialize prey->prey angles table
 	prey_distances = new float*[PreySwarm::population_size];
 	for (int i = 0; i < PreySwarm::population_size; ++i)
 		prey_distances[i] = new float[PreySwarm::population_size];
