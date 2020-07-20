@@ -15,6 +15,7 @@ public:
 	static int observations_size;
 	static int actions_size;
 
+	static int vision_size;
 	static float vision_range;
 	static float vision_range_squared;
 	static float vision_angle;
@@ -29,6 +30,7 @@ public:
 	static float hear_cell_angle_rad;
 
 	static bool communication_enabled;
+	static float sound_value;
 
 	static float attack_range;
 	static float attack_range_squared;
@@ -39,7 +41,7 @@ public:
 
 	static float confusion_range;
 	static float confusion_range_squared;
-	static float confusion_ratio;
+	//static float confusion_ratio;
 
 public:
 	int number_alive;

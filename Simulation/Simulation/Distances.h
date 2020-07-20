@@ -18,13 +18,17 @@ public:
 	float** predator_prey_distances;
 	float** predator_prey_angles;
 
+	float** prey_plant_distances;
+	float** prey_plant_angles;
+
 	Distances();
 	Distances(PreySwarm &prey_swarm, PredatorSwarm & predator_swarm);
 	~Distances();
 
-	void reset();
-
-	void recalculate_prey_distances_observations();
-	void recalculate_prey_predator_distances_observations();
+	void recalculate_prey_observations();
+	void recalculate_prey_observations_2();
+	void recalculate_prey_predator_observations();
+	void recalculate_prey_predator_observations_2();
+	void recalculate_plant_observations();
 };
 #endif

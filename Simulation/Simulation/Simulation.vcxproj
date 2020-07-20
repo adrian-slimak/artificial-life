@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClCompile Include="Distances.cpp" />
     <ClCompile Include="EnvManager.cpp" />
+    <ClCompile Include="INetwork.cpp" />
     <ClCompile Include="json11.cpp" />
     <ClCompile Include="LSTM.cpp" />
     <ClCompile Include="PredatorSwarm.cpp" />

@@ -11,9 +11,10 @@
 int PreySwarm::population_size = 50;
 int PreySwarm::brain_cells = 8;
 NetworkType PreySwarm::network_type = NetworkType::_LSTM;
-int PreySwarm::observations_size = 39;
+int PreySwarm::observations_size = 26;
 int PreySwarm::actions_size = 2;
 
+int PreySwarm::vision_size = 26;
 float PreySwarm::vision_range = 100.f;
 float PreySwarm::vision_range_squared = 100.f*100.f;
 float PreySwarm::vision_angle = 182.f;
@@ -28,9 +29,17 @@ int PreySwarm::hear_cells = 12;
 float PreySwarm::hear_cell_angle_rad = 30.f * Distances::deg2rad;
 
 bool PreySwarm::communication_enabled = false;
+int PreySwarm::food_sound_trigger = 5;
+//float PreySwarm::food_sound_value = 2.5f;
+//int PreySwarm::predator_sound_trigger = 1;
+//float PreySwarm::predator_sound_value = 5.f;
 
 float PreySwarm::eat_range = 5.f;
+float PreySwarm::eat_range_squared = 5.f * 5.f;
 int PreySwarm::eat_delay = 10;
+float PreySwarm::energy_start = 100.f;
+float PreySwarm::energy_gain_per_eat = 25.f;
+float PreySwarm::energy_drain_per_step = 0.1f;
 
 float PreySwarm::move_speed = 1.f;
 float PreySwarm::turn_speed_rad = 8.f * Distances::deg2rad;
@@ -45,7 +54,8 @@ PreySwarm::PreySwarm()
 
 	angle = Eigen::ArrayXf(PreySwarm::population_size);
 
-	eat_delays = new int[PreySwarm::population_size];
+	//eat_delays = Eigen::ArrayXi(PreySwarm::population_size);
+	//plants_alive = new bool[PreySwarm::population_size];
 
 	if (network_type == NetworkType::_LSTM)
 		this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
@@ -58,7 +68,8 @@ PreySwarm::PreySwarm()
 PreySwarm::~PreySwarm()
 {
 
-	delete[] eat_delays;
+	delete[] alive;
+	//delete[] plants_alive;
 }
 
 void PreySwarm::reset()
@@ -67,11 +78,12 @@ void PreySwarm::reset()
 	for (int i = 0; i < population_size; i++)
 		alive[i] = true;
 
+	//for (int i = 0; i < population_size; i++)
+	//	plants_alive[i] = true;
+
 	position.setRandom();
 	position *= Simulation::world_size_half;
 
-	//for (int i = 0; i < PreySwarm::population_size; i++)
-	//	angle[i] = ((float)std::rand() / (RAND_MAX)) * 6.18f;
 	angle.setRandom();
 	angle += 1.f;
 	angle *= 3.14;
@@ -79,9 +91,10 @@ void PreySwarm::reset()
 	fitness = 0.f;
 	mean_density = 0.f;
 	mean_dispersion = 0.f;
+	number_eats = 0;
 
-	for (int i = 0; i < PreySwarm::population_size; i++)
-		eat_delays[i] = 0;
+	//energy.setConstant(energy_start);
+	//eat_delays.setZero();
 
 	this->model->reset();
 }
@@ -173,3 +186,44 @@ void PreySwarm::update_movement()
 		return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
 	});
 }
+
+//void PreySwarm::try_eat()
+//{
+//	int target_id;
+//	float min_dist;
+//
+//	for (int prey_id = 0; prey_id < population_size; prey_id++)
+//	{
+//		// If attack delay is greater than 0, prey cant eat yet
+//		if (eat_delays[prey_id] > 0)
+//			eat_delays[prey_id] -= 1;
+//		else
+//		{
+//			target_id = -1;
+//			min_dist = 1000000.f;
+//			// Prey can eat now, find closest plant
+//			for (int plant_id = 0; plant_id < PreySwarm::population_size; plant_id++)
+//			{
+//				if (this->plants_alive[prey_id] &&
+//					std::abs(distances->prey_plant_angles[prey_id][plant_id]) < PreySwarm::vision_angle_half_rad &&
+//					distances->prey_plant_distances[prey_id][plant_id] < min_dist)
+//				{
+//					min_dist = distances->prey_plant_distances[prey_id][plant_id];
+//					target_id = prey_id;
+//				}
+//			}
+//
+//			if (min_dist > PreySwarm::eat_range)
+//				target_id = -1;
+//
+//			if (target_id > -1)
+//			{
+//				this->number_eats++;
+//				this->energy(prey_id) += energy_gain_per_eat;
+//				eat_delays[prey_id] = eat_delay;
+//				this->plants_alive[target_id] = false;
+//			}
+//		}
+//	}
+//}
+

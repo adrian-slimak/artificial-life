@@ -1,22 +1,23 @@
-from other.hotkey_listener import HotKeyListener
-from other.utils import save_parameters, current_save_ID
+# from other.hotkey_listener import HotKeyListener
+# from other.utils import save_parameters, current_save_ID
 
 config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
 results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
 
-save_ID = current_save_ID()
-save_ID = 0
-hotkey_listener = HotKeyListener()
-hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_parameters(save_ID))
+# save_ID = 0
+# save_ID = current_save_ID()
+# hotkey_listener = HotKeyListener()
+# hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_parameters(save_ID))
 
 # ENVIRONMENT PARAMETERS
 show_plots = True
 
-number_of_generations = 500
-number_of_steps = 4000
+number_of_generations = 1
 
 prey_brain_cells = 8
 predator_brain_cells = 8
+
+network_type = 'rnn'
 
 prey_observations_size = 26
 predator_observations_size = 26
@@ -45,6 +46,7 @@ max_percent_length = 0.5
 
 # Pairing
 pairing_method = 'Fittest'
+# pairing_method = 'Random'
 
 # Mutation
 gen_mutation_chance = 0.02

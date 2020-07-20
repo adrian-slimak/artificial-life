@@ -9,9 +9,9 @@
       "init_scale": 2,
 
       // Selection
-//      "selection_method": "Roulette Wheel",
+      // "selection_method": "Roulette Wheel",
       "selection_method": "Fittest Half",
-      //"selection_method": "Tournament",
+      // "selection_method": "Tournament",
 
       //Crossover
       "mating_method": "Two Points Per Part",
@@ -35,7 +35,7 @@
 
         "food":
         {
-			"enabled": true,
+			"enabled": false,
             "spawn_method": 1,   // 0 - Grid  1 - Random
             "spawn_per_step": 0,  // 0.3
             "spawn_amount_reset": 0,  // for Random Spawn # 200
@@ -68,19 +68,14 @@
 		"communication":
         {
             "enabled": false,
-            "food_sound_trigger": 8,  // Minimal number of food in 'vision' field to activate this sound
-            "food_sound_value": 2.5,
-            "predator_sound_trigger": 1,  // Minimal number of predators in 'vision' field to activate this sound
-            "predator_sound_value": 5
+            "food_sound_trigger": 8  // Minimal number of food in 'vision' field to activate this sound
         },
 		
 		"hearing":
 		 {
 			"enabled": false,
-			"vector_size": 12,
 			"cell_number": 12,
-			"angle": 360,
-			"range": 40
+			"range": 100
 		 },
 
         "energy":
@@ -98,7 +93,6 @@
 		"brain_cells": 8,
 		"brain_type": "RNN",
 
-		
 		"move_speed": 3,
         "turn_speed": 6,
 		
@@ -108,7 +102,7 @@
 		{
 			"cells": 13,
 			"angle": 182,
-			"range": 100
+			"range": 200
 		},
 		
 		"confusion_effect":
@@ -129,17 +123,8 @@
 		"hearing":
 		 {
 			"enabled": false,
-			"vector_size": 12,
 			"cell_number": 12,
-			"angle": 360,
-			"range": 40
-		 },
-
-        "energy":
-        {
-            "start_value": 125,
-            "gain_per_eat": 50,
-            "drain_per_step": 0
-        }
+			"range": 150
+		 }
     }
 }

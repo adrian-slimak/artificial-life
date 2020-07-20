@@ -1,10 +1,10 @@
 from multiprocessing import Process, Queue
 from collections.abc import Iterable
 import matplotlib.pyplot as plt
-from other.hotkey_listener import HotKeyListener
+# from other.hotkey_listener import HotKeyListener
 from pickle import dump
 import matplotlib
-from learning_parameters import save_ID, results_save_path
+# from learning_parameters import save_ID, results_save_path
 plt.style.use('ggplot')
 matplotlib.use('tkagg')
 
@@ -68,7 +68,7 @@ class LivePlot:
         self.plot_process.start()
 
     def __call__(self):
-        HotKeyListener().add('<ctrl>+<alt>+a', self.save)
+        # HotKeyListener().add('<ctrl>+<alt>+a', self.save)
         timer = self.fig.canvas.new_timer(interval=250)
         timer.add_callback(self._call_back)
         timer.start()
@@ -90,14 +90,14 @@ class LivePlot:
             self.plots[data_key].update(data[data_key])
         # self.fig.canvas.flush_events()
 
-    def save(self):
-        with open(results_save_path+f'data/data_{save_ID}.pkl', 'wb') as file:
-            to_save = {}
-            for plot_name, plot in self.plots.items():
-                to_save[plot_name] = {'Y': plot.Y, 'title': plot.title, 'xlabel': plot.xlabel, 'ylabel': plot.ylabel}
-            dump(to_save, file)
-
-        plt.savefig(results_save_path+f'plots/plot_{save_ID}.png')
+    # def save(self):
+    #     with open(results_save_path+f'data/data_{save_ID}.pkl', 'wb') as file:
+    #         to_save = {}
+    #         for plot_name, plot in self.plots.items():
+    #             to_save[plot_name] = {'Y': plot.Y, 'title': plot.title, 'xlabel': plot.xlabel, 'ylabel': plot.ylabel}
+    #         dump(to_save, file)
+    #
+    #     plt.savefig(results_save_path+f'plots/plot_{save_ID}.png')
 
     def update(self, data):
         self.plot_queue.put(data)

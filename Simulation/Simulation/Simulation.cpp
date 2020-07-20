@@ -38,15 +38,14 @@ Simulation::Simulation(bool show_visualization)
 
 Simulation::~Simulation()
 {
-	//delete prey_swarm;
-	//delete predator_swarm;
-	//delete distances;
+	delete prey_swarm;
+	delete predator_swarm;
+	delete distances;
 	//delete visualization;
 }
 
 void Simulation::reset()
 {
-	distances->reset();
 	prey_swarm->reset();
 	predator_swarm->reset();
 
@@ -67,11 +66,14 @@ void Simulation::runSingleEpisode()
 	// Warmup without predators
 	while (step < steps_without_predators)
 	{
-		this->distances->recalculate_prey_distances_observations();
+		this->distances->recalculate_prey_observations();
+
+		// Update Density and Dispersion
+		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
+
+		//this->prey_swarm->try_eat();
 
 		this->prey_swarm->update_decisions();
-
-		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
 
 		//if (visualization) visualization->render();
 
@@ -85,14 +87,17 @@ void Simulation::runSingleEpisode()
 	// Main simulation loop
 	while (step < simulation_steps)
 	{
-		this->distances->recalculate_prey_predator_distances_observations();
+		this->distances->recalculate_prey_predator_observations();
+
+		// Update Density and Dispersion
+		this->prey_swarm->update_stats();
+		this->predator_swarm->update_stats();
+
 		this->predator_swarm->try_hunt(); // Przed update stats???
+		//this->prey_swarm->try_eat();
 
 		prey_swarm->update_decisions();
 		predator_swarm->update_decisions();
-
-		this->prey_swarm->update_stats();
-		this->predator_swarm->update_stats();
 
 		//if (visualization) visualization->render();
 

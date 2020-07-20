@@ -27,6 +27,7 @@ def get_shapes_lengths(input_dim, units, output_dim, model_name='lstm', use_bias
 
     return shapes, lengths
 
+
 class Genotype:
     def __init__(self, lengths):
         self.lengths = lengths

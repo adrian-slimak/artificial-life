@@ -1,4 +1,4 @@
-from learning_parameters import number_of_steps, number_of_generations
+from learning_parameters import number_of_generations
 
 plot_size = (14, 6)  # Width / Height
 

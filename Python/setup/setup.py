@@ -14,7 +14,8 @@ setup(name='EnvManagerPkg',
                              files_path+'PreySwarm.cpp',
                              files_path+'LSTM.cpp',
                              files_path+'RNN.cpp',
-                             files_path+'json11.cpp'],
+                             files_path+'json11.cpp',
+                             files_path+'INetwork.cpp'],
                     include_dirs=['../../Simulation/packages/Eigen.3.3.3/build/native/include/'],
                     # libraries=["sfml-sysem-s-d","sfml-grapics-s-d"]
                     )]

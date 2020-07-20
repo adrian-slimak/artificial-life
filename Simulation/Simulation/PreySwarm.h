@@ -15,6 +15,7 @@ public:
 	static int observations_size;
 	static int actions_size;
 
+	static int vision_size;
 	static float vision_range;
 	static float vision_range_squared;
 	static float vision_angle;
@@ -29,26 +30,38 @@ public:
 	static float hear_cell_angle_rad;
 
 	static bool communication_enabled;
+	static int food_sound_trigger;
+	//static float food_sound_value;
+	//static int predator_sound_trigger;
+	//static float predator_sound_value;
 
 	static float eat_range;
+	static float eat_range_squared;
 	static int eat_delay;
+	static float energy_start;
+	static float energy_gain_per_eat;
+	static float energy_drain_per_step;
 
 	static float move_speed;
 	static float turn_speed_rad;
 
 public:
 	int number_alive;
-	bool *alive;
+	bool* alive;
 
 	Eigen::ArrayXXf position;
 	Eigen::ArrayXXf norm;
 	Eigen::ArrayXf angle;
 
+	//Eigen::ArrayXXf plants_position;
+	//bool* plants_alive;
+	//Eigen::ArrayXi eat_delays;
+	//Eigen::ArrayXf energy;
+
 	float fitness;
 	float mean_density;
 	float mean_dispersion;
-
-	int* eat_delays;
+	int number_eats;
 
 	INetwork *model;
 
@@ -62,6 +75,7 @@ public:
 	void update_movement();
 	void update_fitness();
 	void update_stats();
+	void try_eat();
 	void reset();
 	void set_model(float* prey_genes);
 };
