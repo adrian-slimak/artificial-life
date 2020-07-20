@@ -38,9 +38,9 @@ Simulation::Simulation(bool show_visualization)
 
 Simulation::~Simulation()
 {
-	delete prey_swarm;
-	delete predator_swarm;
-	delete distances;
+	//delete prey_swarm;
+	//delete predator_swarm;
+	//delete distances;
 	//delete visualization;
 }
 
