@@ -7,7 +7,11 @@
 
 # Other
 Results/
-Python/Setup/build
+Python/Setup/build/
+Python/__pycache__/
+Python/other/__pycache__/
+Python/.idea/
+Simulation/.idea/
 
 # Build results
 [Dd]ebug/

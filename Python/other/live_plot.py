@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 # from other.hotkey_listener import HotKeyListener
 from pickle import dump
 import matplotlib
-# from learning_parameters import save_ID, results_save_path
+from learning_parameters import results_save_path
+import pandas
 plt.style.use('ggplot')
 matplotlib.use('tkagg')
 
@@ -80,8 +81,11 @@ class LivePlot:
             if data is None:  # Terminate
                 plt.close('all')
                 return False
+            elif isinstance(data, int):
+                self._save(data)
             else:
                 self._update_data(data)
+
         self.fig.canvas.draw()
         return True
 
@@ -90,17 +94,24 @@ class LivePlot:
             self.plots[data_key].update(data[data_key])
         # self.fig.canvas.flush_events()
 
-    # def save(self):
-    #     with open(results_save_path+f'data/data_{save_ID}.pkl', 'wb') as file:
-    #         to_save = {}
-    #         for plot_name, plot in self.plots.items():
-    #             to_save[plot_name] = {'Y': plot.Y, 'title': plot.title, 'xlabel': plot.xlabel, 'ylabel': plot.ylabel}
-    #         dump(to_save, file)
-    #
-    #     plt.savefig(results_save_path+f'plots/plot_{save_ID}.png')
+    def _save(self, id):
+        # with open(results_save_path+f'{id}_data.pkl', 'wb') as file:
+        to_save = {}
+        for plot_name, plot in self.plots.items():
+            for line, data in plot.Y.items():
+                to_save[f'{plot.title} - {line}'] = data
+            # dump(to_save, file)
+
+        df = pandas.DataFrame(to_save)
+        df.to_csv(results_save_path+f'{id}_data.csv', encoding='utf-8', index=False, sep=';')
+
+        plt.savefig(results_save_path+f'{id}_plot.png')
 
     def update(self, data):
         self.plot_queue.put(data)
+
+    def save(self, id):
+        self.plot_queue.put(id)
 
     def close(self):
         self.plot_queue.put(None)

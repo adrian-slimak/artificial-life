@@ -29,18 +29,18 @@ def get_shapes_lengths(input_dim, units, output_dim, model_name='lstm', use_bias
 
 
 class Genotype:
-    def __init__(self, lengths):
-        self.lengths = lengths
-        self.genotype = np.zeros((sum(self.lengths)), dtype=np.float32)
-        self.length = len(self.genotype)
+    def __init__(self, length):
+        self.length = length
+        self.genotype = None
         self.fitness = None
 
     def copy(self):
-        new_one = type(self)(self.lengths)
+        new_one = type(self)(self.length)
         new_one.genotype = self.genotype.copy()
         return new_one
 
     def random_init(self, min=_lp.init_min_genes, max=_lp.init_max_genes, loc=_lp.init_loc, scale=_lp.init_scale):
+        self.genotype = np.zeros(self.length, dtype=np.float32)
         percentOfGenes = random.uniform(min, max)
         numOfGenes = int(self.length * percentOfGenes)
         genesIdx = random.sample(range(0, self.length - 1), numOfGenes)
@@ -61,7 +61,8 @@ class GeneticAlgorithm:
         self.model_name = model_name
 
     def initial_population(self):
-        self.population = [Genotype(self.lengths) for i in range(self.population_size)]
+        genotype_length = sum(self.lengths)
+        self.population = [Genotype(genotype_length) for i in range(self.population_size)]
         for individual in self.population:
             individual.random_init()
 
@@ -81,20 +82,20 @@ class GeneticAlgorithm:
         self.population = sorted(self.population, key=lambda individual: individual.fitness, reverse=True)
 
     def next_generation(self):
+        # Selection
         selected_individuals = GeneticAlgorithm.selection(self.population, method=_lp.selection_method)
 
+        # Pairing
         parents = GeneticAlgorithm.pairing(selected_individuals)
 
+        # Crossover
         offsprings = [GeneticAlgorithm.mating(parents[x]) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
-        elite_individuals = self.population[:2]
-        selected_individuals = selected_individuals[2:]
-
+        # Mutations
         next_gen = selected_individuals + offsprings
         for individual in next_gen:
             GeneticAlgorithm.mutation(individual)
-        next_gen.extend(elite_individuals)
 
         if len(next_gen) != self.population_size:
             raise Exception("Next Gen size different than expected")
@@ -124,38 +125,46 @@ class GeneticAlgorithm:
             raise Exception('Not such selection method found')
 
     @staticmethod
-    def pairing(selected, method=_lp.pairing_method):
-        individuals = selected
+    def pairing(individuals, method=_lp.pairing_method):
         parents = []
 
         if method == 'Fittest':
-            parents = [[individuals[x], individuals[x + 1]] for x in range(len(individuals) // 2)]
+            parents = [[individuals[x], individuals[x + 1]] for x in range(0, len(individuals), 2)]
 
         return parents
 
     @staticmethod
-    def mating(parents, max_percent_length=_lp.max_percent_length, method=_lp.mating_method):
+    def mating(parents, method=_lp.mating_method):
         offsprings = [parents[0].copy(), parents[1].copy()]
 
-        if method == 'Two Points Per Part':
-            partStart = 0
-            for partLength in parents[0].lengths:
-                l = int(random.uniform(0, max_percent_length) * (partLength-1))
-                s = random.randrange(partStart, partStart + partLength)
-                if s+l>=len(parents[0].genotype):
-                    l-=(s+l)-len(parents[0].genotype)
-                offsprings[0].genotype[s:s+l] = parents[1].genotype[s:s+l].copy()
-                offsprings[1].genotype[s:s+l] = parents[0].genotype[s:s+l].copy()
-                partStart += partLength
+        if method == 'None':
+            pass
+
+        elif method == 'Two Points Per Part':
+            p_s = 0
+            for p_l in parents[0].lengths:
+                a = random.randrange(p_s, p_s + p_l)
+                b = random.randrange(p_s, p_s + p_l)
+
+                if a > b:
+                    a, b = b, a
+                b += 1
+
+                offsprings[0].genotype[a:b] = parents[1].genotype[a:b]
+                offsprings[1].genotype[a:b] = parents[0].genotype[a:b]
+
+                p_s += p_l
 
         elif method == 'Two Points':
-            genotype_length = len(parents[0].genotype)
-            l = int(random.uniform(0, max_percent_length) * genotype_length)
-            s = random.randrange(0, genotype_length)
-            if s + l >= len(parents[0].genotype):
-                l -= (s+l)-len(parents[0].genotype)
-            offsprings[0].genotype[s:s+l] = parents[1].genotype[s:s+l]
-            offsprings[1].genotype[s:s+l] = parents[0].genotype[s:s+l]
+            a = random.randrange(0, parents[0].length)
+            b = random.randrange(0, parents[0].length)
+
+            if a > b:
+                a, b = b, a
+            b += 1
+
+            offsprings[0].genotype[a:b] = parents[1].genotype[a:b]
+            offsprings[1].genotype[a:b] = parents[0].genotype[a:b]
 
         else:
             raise Exception('Not such mating method found')
@@ -164,27 +173,35 @@ class GeneticAlgorithm:
 
     @staticmethod
     def mutation(individual, gen_mutation_chance=_lp.gen_mutation_chance, gen_deletion_chance=_lp.gen_deletion_chance, gen_duplication_chance=_lp.gen_duplication_chance):
-        for gen_id in range(individual.length):
-            if individual.genotype[gen_id] == 0.:
-                if random.random() <= gen_duplication_chance:
-                    individual.genotype[gen_id] = random.gauss(mu=0., sigma=_lp.init_scale)
-            else:
-                if random.random() <= gen_deletion_chance:
-                    individual.genotype[gen_id] = 0.
-                if random.random() <= gen_mutation_chance:
-                    individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
+        # for gen_id in range(individual.length):
+        #     if individual.genotype[gen_id] == 0.:
+        #         if random.random() <= gen_duplication_chance:
+        #             individual.genotype[gen_id] = random.gauss(mu=0., sigma=_lp.init_scale)
+        #     else:
+        #         if random.random() <= gen_deletion_chance:
+        #             individual.genotype[gen_id] = 0.
+        #         if random.random() <= gen_mutation_chance:
+        #             individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
 
-        # if random.random() <= gen_duplication_chance:
-        #     i1 = random.randint(0, individual.length - 2)
-        #     i2 = random.randint(i1 + 1, individual.length - 1)
-        #     i0 = random.randint(0, individual.length - 1)
-        #     individual.genotype[i0:i0 + (i2-i1) + 1] = (individual.genotype[i1:i2 + 1])[0:individual.length - i0]
-        #
-        # if random.random() <= gen_deletion_chance:
-        #     i1 = random.randint(0, individual.length - 2)
-        #     i2 = random.randint(i1 + 1, individual.length - 1)
-        #     individual.genotype[i1:i1+(individual.length-i2-1)] = individual.genotype[i2+1:]
-        #     individual.genotype[-(i2 - i1 + 1):] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale, size=i2-i1+1)
+        for gen_id in range(individual.length):
+            if random.random() <= gen_mutation_chance:
+                individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
+
+        if random.random() <= gen_duplication_chance:
+            a = random.randrange(0, individual.length)
+            b = random.randrange(0, individual.length)
+            if a>b:
+                a,b=b,a
+            p = random.randrange(0, individual.length - 1)
+            individual.genotype[p:p + (b-a) + 1] = (individual.genotype[a:b + 1])[0:individual.length - p]
+
+        if random.random() <= gen_deletion_chance:
+            a = random.randrange(0, 20)
+            b = random.randrange(0, 20)
+            if a>b:
+                a,b=b,a
+            individual.genotype[a:a+(individual.length-b-1)] = individual.genotype[b+1:]
+            individual.genotype[-(b - a + 1):] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale, size=b-a+1)
 
     def to_genes(self):
         genes = []

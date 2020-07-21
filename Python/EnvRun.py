@@ -1,13 +1,15 @@
 from other.live_plot import LivePlot
-# from other.utils import save_genes
+from other.utils import save_genes, save_learning_parameters
 import learning_parameters as _lp
 from GA import GeneticAlgorithm
 import plots_parameters as _pp
 import numpy as np
 import EnvManager
-from time import time
+from time import time, sleep
 np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
+
+save_ID = 0
 
 def main():
     live_plot = LivePlot(plots=_pp.plot_structure, subplots=_pp.plot_subplots, figsize=_pp.plot_size) if _lp.show_plots else None
@@ -67,6 +69,14 @@ def main():
 
         GA_prey.next_generation()
         GA_predator.next_generation()
+
+    sleep(1)
+    # Save experiment data...
+    save_genes({'prey': GA_prey, 'predator': GA_predator}, save_ID)
+    save_learning_parameters(save_ID)
+    live_plot.save(save_ID)
+
+    sleep(2)
 
     if live_plot:
         live_plot.close()

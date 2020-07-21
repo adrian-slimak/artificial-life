@@ -12,7 +12,7 @@ results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
 # ENVIRONMENT PARAMETERS
 show_plots = True
 
-number_of_generations = 1
+number_of_generations = 2
 
 prey_brain_cells = 8
 predator_brain_cells = 8
@@ -40,15 +40,15 @@ selection_method = 'Roulette Wheel'
 # selection_method = 'Tournament'
 
 # Crossover
-mating_method = 'Two Points Per Part'
-# mating_method = 'Two Points'
-max_percent_length = 0.5
+# mating_method = 'None'
+# mating_method = 'Two Points Per Part'
+mating_method = 'Two Points'
 
 # Pairing
 pairing_method = 'Fittest'
 # pairing_method = 'Random'
 
 # Mutation
-gen_mutation_chance = 0.02
-gen_deletion_chance = 0.01
-gen_duplication_chance = 0.03
+gen_mutation_chance = 0.01
+gen_duplication_chance = 0.05
+gen_deletion_chance = 0.02
