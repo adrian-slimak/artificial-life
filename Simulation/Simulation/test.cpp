@@ -9,7 +9,7 @@ int main()
 	srand(time(NULL));
 
 	EnvManager::set_parameters("C:/Users/adek1/source/repos/ArtificalLife/config.json");
-	Simulation sim = Simulation(false);
+	Simulation sim = Simulation(true);
 
 	//std::vector<Simulation> simulations;
 

@@ -120,7 +120,6 @@ void EnvManager::set_parameters(const char *params_file_path)
 	std::string err;
 	const auto json = json11::Json::parse_file(params_file_path, err, json11::COMMENTS);
 
-	//std::cout << "err: " << err << "\n";
 	//std::cout << "k1: " << (float)json["prey"]["count"].number_value() << "\n";
 
 	PreySwarm::population_size = (int)json["prey"]["count"].number_value();
@@ -150,31 +149,25 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PredatorSwarm::vision_cells = (int)json["predator"]["vision"]["cells"].number_value();
 	PredatorSwarm::vision_cell_angle_rad = (float)(PredatorSwarm::vision_angle / PredatorSwarm::vision_cells) * Distances::deg2rad;
 
-	PreySwarm::hear_enabled = json["prey"]["hearing"]["enabled"].bool_value();
-	PreySwarm::hear_range = (float)json["prey"]["hearing"]["range"].number_value();
+	PreySwarm::communication_enabled = json["prey"]["communication"]["enabled"].bool_value();
+	PreySwarm::food_sound_trigger = (int)json["prey"]["communication"]["food_sound_trigger"].number_value();
+	PredatorSwarm::communication_enabled = json["predator"]["communication"]["enabled"].bool_value();
+
+	PreySwarm::hear_range = (float)json["prey"]["communication"]["hear_range"].number_value();
 	PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
-	PreySwarm::hear_cells = (int)json["prey"]["hearing"]["cells"].number_value();
+	PreySwarm::hear_cells = (int)json["prey"]["communication"]["hear_cells"].number_value();
 	PreySwarm::hear_cell_angle_rad = (float)(360.0 / PreySwarm::vision_cells) * Distances::deg2rad;
 
-	PredatorSwarm::hear_enabled = json["predator"]["hearing"]["enabled"].bool_value();
-	PredatorSwarm::hear_range = (float)json["predator"]["hearing"]["range"].number_value();
+	PredatorSwarm::hear_range = (float)json["predator"]["communication"]["hear_range"].number_value();
 	PredatorSwarm::hear_range_squared = PredatorSwarm::hear_range * PredatorSwarm::hear_range;
-	PredatorSwarm::hear_cells = (int)json["predator"]["hearing"]["cells"].number_value();
+	PredatorSwarm::hear_cells = (int)json["predator"]["communication"]["hear_cells"].number_value();
 	PredatorSwarm::hear_cell_angle_rad = (float)(360.0 / PredatorSwarm::vision_cells) * Distances::deg2rad;
-
-	PreySwarm::communication_enabled = json["prey"]["communication"]["enabled"].bool_value();
-	PreySwarm::food_sound_trigger = (int)json["prey"]["communication"]["food_sound_trigger"].bool_value();
-	//PreySwarm::food_sound_value = (float)json["prey"]["communication"]["food_sound_value"].bool_value();
-	//PreySwarm::predator_sound_trigger = (int)json["prey"]["communication"]["predator_sound_trigger"].bool_value();
-	//PreySwarm::predator_sound_value = (float)json["prey"]["communication"]["predator_sound_value"].bool_value();
-	PredatorSwarm::communication_enabled = json["predator"]["communication"]["enabled"].bool_value();
-	PredatorSwarm::sound_value = (float)json["predator"]["communication"]["sound_value"].bool_value();
 
 	bool food_enabled = json["environment"]["food"]["enabled"].bool_value();
 	PreySwarm::vision_size = PreySwarm::vision_cells * (food_enabled ? 3 : 2);
 	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (food_enabled ? 3 : 2);
-	PreySwarm::observations_size = PreySwarm::vision_size + (PreySwarm::hear_enabled ? PreySwarm::hear_cells : 0);
-	PredatorSwarm::observations_size = PredatorSwarm::vision_size + (PredatorSwarm::hear_enabled ? PredatorSwarm::hear_cells : 0);
+	PreySwarm::observations_size = PreySwarm::vision_size + (PreySwarm::communication_enabled ? PreySwarm::hear_cells : 0);
+	PredatorSwarm::observations_size = PredatorSwarm::vision_size + (PredatorSwarm::communication_enabled ? PredatorSwarm::hear_cells : 0);
 
 	PreySwarm::actions_size = (int)json["prey"]["actions_size"].number_value();
 	PredatorSwarm::actions_size = (int)json["predator"]["actions_size"].number_value();
@@ -182,18 +175,19 @@ void EnvManager::set_parameters(const char *params_file_path)
 		PredatorSwarm::actions_size += 1;
 
 	PreySwarm::eat_range = (float)json["prey"]["eat_range"].number_value();
-	PreySwarm::eat_range_squared = PreySwarm::eat_range*PreySwarm::eat_range;
+	PreySwarm::eat_range_squared = PreySwarm::eat_range * PreySwarm::eat_range;
 	PreySwarm::eat_delay = (int)json["prey"]["eat_delay"].number_value();
+	PredatorSwarm::attack_range = (float)json["predator"]["eat_range"].number_value();
+	PredatorSwarm::attack_range_squared = PredatorSwarm::attack_range * PredatorSwarm::attack_range;
+	PredatorSwarm::attack_delay = (int)json["predator"]["eat_delay"].number_value();
+
 	PreySwarm::energy_start = (float)json["prey"]["energy"]["start_value"].number_value();
 	PreySwarm::energy_gain_per_eat = (float)json["prey"]["energy"]["gain_per_eat"].number_value();
 	PreySwarm::energy_drain_per_step = (float)json["prey"]["energy"]["drain_per_step"].number_value();
-	PredatorSwarm::attack_range = (float)json["predator"]["eat_range"].number_value();
-	PredatorSwarm::attack_range_squared = PredatorSwarm::attack_range*PredatorSwarm::attack_range;
-	PredatorSwarm::attack_delay = (int)json["predator"]["eat_delay"].number_value();
 
 	PredatorSwarm::confusion_range = (float)json["predator"]["confusion_effect"]["range"].number_value();
 	PredatorSwarm::confusion_range_squared = PredatorSwarm::confusion_range*PredatorSwarm::confusion_range;
-	//PredatorSwarm::confusion_ratio = (float)json["predator"]["confusion_effect"]["ratio"].number_value();
+	PredatorSwarm::confusion_ratio = (float)json["predator"]["confusion_effect"]["ratio"].number_value();
 
 
 	Simulation::world_size = (float)json["environment"]["world_size"].number_value();

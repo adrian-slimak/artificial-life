@@ -101,8 +101,8 @@ void Simulation::runSingleEpisode()
 
 		//if (visualization) visualization->render();
 
-		this->predator_swarm->update_movement();
 		this->prey_swarm->update_movement();
+		this->predator_swarm->update_movement();
 
 		this->prey_swarm->update_fitness();
 		this->predator_swarm->update_fitness();

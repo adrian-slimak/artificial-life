@@ -1,10 +1,8 @@
+from learning_parameters import results_save_path
 from multiprocessing import Process, Queue
 from collections.abc import Iterable
 import matplotlib.pyplot as plt
-# from other.hotkey_listener import HotKeyListener
-from pickle import dump
 import matplotlib
-from learning_parameters import results_save_path
 import pandas
 plt.style.use('ggplot')
 matplotlib.use('tkagg')
@@ -69,7 +67,6 @@ class LivePlot:
         self.plot_process.start()
 
     def __call__(self):
-        # HotKeyListener().add('<ctrl>+<alt>+a', self.save)
         timer = self.fig.canvas.new_timer(interval=250)
         timer.add_callback(self._call_back)
         timer.start()
@@ -92,15 +89,12 @@ class LivePlot:
     def _update_data(self, data):
         for data_key in data.keys():
             self.plots[data_key].update(data[data_key])
-        # self.fig.canvas.flush_events()
 
     def _save(self, id):
-        # with open(results_save_path+f'{id}_data.pkl', 'wb') as file:
         to_save = {}
         for plot_name, plot in self.plots.items():
             for line, data in plot.Y.items():
                 to_save[f'{plot.title} - {line}'] = data
-            # dump(to_save, file)
 
         df = pandas.DataFrame(to_save)
         df.to_csv(results_save_path+f'{id}_data.csv', encoding='utf-8', index=False, sep=';')

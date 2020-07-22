@@ -1,28 +1,25 @@
-# from other.hotkey_listener import HotKeyListener
-# from other.utils import save_parameters, current_save_ID
-
 config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
 results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
+learning_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/Python/learning_parameters.py"
 
-# save_ID = 0
-# save_ID = current_save_ID()
-# hotkey_listener = HotKeyListener()
-# hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_parameters(save_ID))
+import json
+with open(config_file_path, 'r') as f:
+    config = json.loads(f.read())
 
 # ENVIRONMENT PARAMETERS
 show_plots = True
 
-number_of_generations = 2
+number_of_generations = 1
 
-prey_brain_cells = 8
-predator_brain_cells = 8
+prey_brain_cells = config['prey']['brain_cells']
+predator_brain_cells = config['predator']['brain_cells']
 
-network_type = 'rnn'
+network_type = config['prey']['brain_type'].lower()
 
-prey_observations_size = 26
-predator_observations_size = 26
+prey_observations_size = config["prey"]["vision"]["cells"] * 3 if config["environment"]["food"]["enabled"] else 2
+predator_observations_size = config["predator"]["vision"]["cells"] * 3 if config["environment"]["food"]["enabled"] else 2
 prey_actions_size = 2
-predator_actions_size = 2
+predator_actions_size = 3 if config["predator"]["communication"]["enabled"] else 2
 
 # GENETIC ALGORITHM PARAMETERS
 # Population

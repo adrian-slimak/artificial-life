@@ -1,32 +1,4 @@
 {
-    "learning":
-    {
-      "population_size": 100,
-
-      "init_min_genes": 0.7,
-      "init_max_genes": 0.9,
-      "init_loc": 0,
-      "init_scale": 2,
-
-      // Selection
-      // "selection_method": "Roulette Wheel",
-      "selection_method": "Fittest Half",
-      // "selection_method": "Tournament",
-
-      //Crossover
-      "mating_method": "Two Points Per Part",
-      //"mating_method": "Two Points",
-      "max_percent_length": 0.5,
-
-      // Pairing
-      "pairing_method": "Fittest",
-
-      // Mutation
-      "gen_mutation_chance": 0.02,
-      "gen_deletion_chance": 0.01,
-      "gen_duplication_chance": 0.03
-    },
-
     "environment":
     {
         "world_size": 512,
@@ -36,10 +8,10 @@
         "food":
         {
 			"enabled": false,
-            "spawn_method": 1,   // 0 - Grid  1 - Random
-            "spawn_per_step": 0,  // 0.3
-            "spawn_amount_reset": 0,  // for Random Spawn # 200
-            "spawn_grid_step": 4  // for Grid Spawn
+            "spawn_method": 1,
+            "spawn_per_step": 0,
+            "spawn_amount_reset": 0,
+            "spawn_grid_step": 4
         }
     },
 
@@ -63,20 +35,15 @@
 		},
 
         "eat_delay": 0,
-        "eat_range": 1,
+        "eat_range": 5.0,
 		
 		"communication":
         {
             "enabled": false,
-            "food_sound_trigger": 8  // Minimal number of food in 'vision' field to activate this sound
+            "food_sound_trigger": 8,
+            "hear_cells": 12,
+            "hear_range": 150
         },
-		
-		"hearing":
-		 {
-			"enabled": false,
-			"cell_number": 12,
-			"range": 100
-		 },
 
         "energy":
         {
@@ -114,17 +81,11 @@
         "eat_delay": 10,
         "eat_range": 5.0,
 
-        "communication":  // If enabled, 'actions_vector_size' will automatically increase by one
+        "communication":
         {
             "enabled": false,
-            "sound_value": 3.5
-        },
-
-		"hearing":
-		 {
-			"enabled": false,
-			"cell_number": 12,
-			"range": 150
-		 }
+            "hear_cells": 12,
+            "hear_range": 200
+        }
     }
 }

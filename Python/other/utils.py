@@ -1,10 +1,7 @@
 from pickle import dump
 from os import listdir
 import re
-
-results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
-config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
-learning_file_path = r"C:\Users\adek1\source\repos\ArtificalLife\Python\learning_parameters.py"
+from learning_parameters import results_save_path, config_file_path, learning_file_path
 
 
 def current_save_ID():

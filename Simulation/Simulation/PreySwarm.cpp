@@ -16,26 +16,21 @@ int PreySwarm::actions_size = 2;
 
 int PreySwarm::vision_size = 26;
 float PreySwarm::vision_range = 100.f;
-float PreySwarm::vision_range_squared = 100.f*100.f;
+float PreySwarm::vision_range_squared = PreySwarm::vision_range * PreySwarm::vision_range;
 float PreySwarm::vision_angle = 182.f;
-float PreySwarm::vision_angle_half_rad = 91.f * Distances::deg2rad;
+float PreySwarm::vision_angle_half_rad = (PreySwarm::vision_angle / 2.f) * Distances::deg2rad;
 int PreySwarm::vision_cells = 13;
-float PreySwarm::vision_cell_angle_rad = 14.f * Distances::deg2rad;
-
-bool PreySwarm::hear_enabled = false;
-float PreySwarm::hear_range = 150.f;
-float PreySwarm::hear_range_squared = 150.f*150.f;
-int PreySwarm::hear_cells = 12;
-float PreySwarm::hear_cell_angle_rad = 30.f * Distances::deg2rad;
+float PreySwarm::vision_cell_angle_rad = (float)(PreySwarm::vision_angle / PreySwarm::vision_cells) * Distances::deg2rad;
 
 bool PreySwarm::communication_enabled = false;
 int PreySwarm::food_sound_trigger = 5;
-//float PreySwarm::food_sound_value = 2.5f;
-//int PreySwarm::predator_sound_trigger = 1;
-//float PreySwarm::predator_sound_value = 5.f;
+float PreySwarm::hear_range = 150.f;
+float PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
+int PreySwarm::hear_cells = 12;
+float PreySwarm::hear_cell_angle_rad = (float)(360.f / PreySwarm::hear_cells) * Distances::deg2rad;
 
 float PreySwarm::eat_range = 5.f;
-float PreySwarm::eat_range_squared = 5.f * 5.f;
+float PreySwarm::eat_range_squared = PreySwarm::eat_range * PreySwarm::eat_range;
 int PreySwarm::eat_delay = 10;
 float PreySwarm::energy_start = 100.f;
 float PreySwarm::energy_gain_per_eat = 25.f;

@@ -23,17 +23,12 @@ public:
 	static int vision_cells;
 	static float vision_cell_angle_rad;
 
-	static bool hear_enabled;
+	static bool communication_enabled;
+	static int food_sound_trigger;
 	static float hear_range;
 	static float hear_range_squared;
 	static int hear_cells;
 	static float hear_cell_angle_rad;
-
-	static bool communication_enabled;
-	static int food_sound_trigger;
-	//static float food_sound_value;
-	//static int predator_sound_trigger;
-	//static float predator_sound_value;
 
 	static float eat_range;
 	static float eat_range_squared;

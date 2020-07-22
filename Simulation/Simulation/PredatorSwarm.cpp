@@ -16,31 +16,28 @@ int PredatorSwarm::actions_size = 2;
 
 int PredatorSwarm::vision_size = 26;
 float PredatorSwarm::vision_range = 100.f;
-float PredatorSwarm::vision_range_squared = 100.f*100.f;
+float PredatorSwarm::vision_range_squared = PredatorSwarm::vision_range * PredatorSwarm::vision_range;
 float PredatorSwarm::vision_angle = 182.f;
-float PredatorSwarm::vision_angle_half_rad = 91.f * Distances::deg2rad;
+float PredatorSwarm::vision_angle_half_rad = (PredatorSwarm::vision_angle/2.f) * Distances::deg2rad;
 int PredatorSwarm::vision_cells = 13;
-float PredatorSwarm::vision_cell_angle_rad = 14.f * Distances::deg2rad;
-
-bool PredatorSwarm::hear_enabled = false;
-float PredatorSwarm::hear_range = 150.f;
-float PredatorSwarm::hear_range_squared = 150.f*150.f;
-int PredatorSwarm::hear_cells = 12;
-float PredatorSwarm::hear_cell_angle_rad = 30.f * Distances::deg2rad;
+float PredatorSwarm::vision_cell_angle_rad = (float)(PredatorSwarm::vision_angle / PredatorSwarm::vision_cells) * Distances::deg2rad;
 
 bool PredatorSwarm::communication_enabled = false;
-float PredatorSwarm::sound_value;
+float PredatorSwarm::hear_range = 150.f;
+float PredatorSwarm::hear_range_squared = PredatorSwarm::hear_range * PredatorSwarm::hear_range;
+int PredatorSwarm::hear_cells = 12;
+float PredatorSwarm::hear_cell_angle_rad = (float)(360.f / PredatorSwarm::hear_cells) * Distances::deg2rad;
 
 float PredatorSwarm::attack_range = 5.f;
-float PredatorSwarm::attack_range_squared = 5.f*5.f;
+float PredatorSwarm::attack_range_squared = PredatorSwarm::attack_range * PredatorSwarm::attack_range;
 int PredatorSwarm::attack_delay = 10;
 
 float PredatorSwarm::move_speed = 3.f;
 float PredatorSwarm::turn_speed_rad = 6.f  * Distances::deg2rad;
 
 float PredatorSwarm::confusion_range = 30.f;
-float PredatorSwarm::confusion_range_squared = 30.f*30.f;
-//float PredatorSwarm::confusion_ratio = 1.f;
+float PredatorSwarm::confusion_range_squared = PredatorSwarm::confusion_range * PredatorSwarm::confusion_range;
+float PredatorSwarm::confusion_ratio = 1.f;
 
 PredatorSwarm::PredatorSwarm()
 {
