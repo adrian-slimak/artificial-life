@@ -114,8 +114,8 @@ void Simulation::runSingleEpisode()
 	this->prey_swarm->mean_dispersion /= simulation_steps;
 
 	int simulation_steps_predators = (simulation_steps - steps_without_predators);
-	this->predator_swarm->mean_density /= simulation_steps_predators;
-	this->predator_swarm->mean_dispersion /= simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
+	this->predator_swarm->mean_density /= (float)simulation_steps_predators;
+	this->predator_swarm->mean_dispersion /= (float)simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
 	this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / (float)this->predator_swarm->number_alive;
 	this->predator_swarm->mean_hunts = this->predator_swarm->number_hunts / (float)this->predator_swarm->number_alive;
 }

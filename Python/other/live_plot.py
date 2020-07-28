@@ -78,7 +78,7 @@ class LivePlot:
             if data is None:  # Terminate
                 plt.close('all')
                 return False
-            elif isinstance(data, int):
+            elif isinstance(data, str):
                 self._save(data)
             else:
                 self._update_data(data)

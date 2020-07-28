@@ -45,6 +45,7 @@ class Genotype:
         numOfGenes = int(self.length * percentOfGenes)
         genesIdx = random.sample(range(0, self.length - 1), numOfGenes)
         genesVals = np.random.normal(loc=loc, scale=scale, size=self.length)
+        # genesVals = np.random.uniform(low=0., high=1., size=100)
         for id in genesIdx:
             self.genotype[id] = genesVals[id]
 
@@ -86,10 +87,10 @@ class GeneticAlgorithm:
         selected_individuals = GeneticAlgorithm.selection(self.population, method=_lp.selection_method)
 
         # Pairing
-        parents = GeneticAlgorithm.pairing(selected_individuals)
+        parents = GeneticAlgorithm.pairing(selected_individuals, method=_lp.pairing_method)
 
         # Crossover
-        offsprings = [GeneticAlgorithm.mating(parents[x]) for x in range(len(parents))]
+        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
         # Mutations
@@ -116,7 +117,7 @@ class GeneticAlgorithm:
         elif method == 'Tournament':
             selected_individuals = []
             for i in range(len(population)//2):
-                selected = random.choices(population, k=int(len(population)//3.5))
+                selected = random.choices(population, k=_lp.tournament_size)
                 selected = max(selected, key=lambda indi: indi.fitness)
                 selected_individuals.append(selected)
             return selected_individuals
@@ -125,7 +126,7 @@ class GeneticAlgorithm:
             raise Exception('Not such selection method found')
 
     @staticmethod
-    def pairing(individuals, method=_lp.pairing_method):
+    def pairing(individuals, method='Fittest'):
         parents = []
 
         if method == 'Fittest':
@@ -134,7 +135,7 @@ class GeneticAlgorithm:
         return parents
 
     @staticmethod
-    def mating(parents, method=_lp.mating_method):
+    def mating(parents, method='None'):
         offsprings = [parents[0].copy(), parents[1].copy()]
 
         if method == 'None':

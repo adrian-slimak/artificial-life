@@ -1,6 +1,6 @@
-config_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/config.json"
-results_save_path = r"C:/Users/adek1/source/repos/ArtificalLife/Results/"
-learning_file_path = r"C:/Users/adek1/source/repos/ArtificalLife/Python/learning_parameters.py"
+config_file_path = r"E:/Repos/ArtificalLife/config.json"
+results_save_path = r"E:/Repos/ArtificalLife/Results/"
+learning_file_path = r"E:/Repos/ArtificalLife/Python/learning_parameters.py"
 
 import json
 with open(config_file_path, 'r') as f:
@@ -9,15 +9,15 @@ with open(config_file_path, 'r') as f:
 # ENVIRONMENT PARAMETERS
 show_plots = True
 
-number_of_generations = 1
+number_of_generations = 1000
 
 prey_brain_cells = config['prey']['brain_cells']
 predator_brain_cells = config['predator']['brain_cells']
 
 network_type = config['prey']['brain_type'].lower()
 
-prey_observations_size = config["prey"]["vision"]["cells"] * 3 if config["environment"]["food"]["enabled"] else 2
-predator_observations_size = config["predator"]["vision"]["cells"] * 3 if config["environment"]["food"]["enabled"] else 2
+prey_observations_size = config["prey"]["vision"]["cells"] * (3 if config["environment"]["food"]["enabled"] else 2)
+predator_observations_size = config["predator"]["vision"]["cells"] * (3 if config["environment"]["food"]["enabled"] else 2)
 prey_actions_size = 2
 predator_actions_size = 3 if config["predator"]["communication"]["enabled"] else 2
 
@@ -26,24 +26,24 @@ predator_actions_size = 3 if config["predator"]["communication"]["enabled"] else
 population_size = 100
 
 # Random Init
-init_min_genes = 0.7
-init_max_genes = 0.9
+init_min_genes = 0.98
+init_max_genes = 0.99
 init_loc = 0.
-init_scale = 2.
+init_scale = 1.
 
 # Selection
-selection_method = 'Roulette Wheel'
-# selection_method = 'Fittest Half'
+selection_method = 'Fittest Half'
+# selection_method = 'Roulette Wheel'
 # selection_method = 'Tournament'
-
-# Crossover
-# mating_method = 'None'
-# mating_method = 'Two Points Per Part'
-mating_method = 'Two Points'
+tournament_size = 30
 
 # Pairing
 pairing_method = 'Fittest'
-# pairing_method = 'Random'
+
+# Crossover
+mating_method = 'None'
+# mating_method = 'Two Points Per Part'
+# mating_method = 'Two Points'
 
 # Mutation
 gen_mutation_chance = 0.01

@@ -109,10 +109,10 @@ void PredatorSwarm::update_fitness()
 void PredatorSwarm::update_stats()
 {
 	int density = 0;
-	float dispersion = 0;
+	float dispersion = 0.f;
 	float min_dist;
 
-	for (int self_id = 0; self_id < 1; self_id++)
+	for (int self_id = 0; self_id < population_size; self_id++)
 	{
 		min_dist = 1000000.f;
 

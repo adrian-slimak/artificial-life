@@ -9,8 +9,7 @@ from time import time, sleep
 np.set_printoptions(precision=3)
 np.set_printoptions(suppress=True)
 
-save_ID = 0
-
+# save_ID = current_save_ID()
 
 def main():
     live_plot = LivePlot(plots=_pp.plot_structure, subplots=_pp.plot_subplots, figsize=_pp.plot_size) if _lp.show_plots else None
@@ -33,54 +32,70 @@ def main():
     env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
     env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
-    # Create Genetic Algorithms for prey swarm and predator swarm
-    GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, _lp.network_type)
-    GA_predator = GeneticAlgorithm(_lp.predator_observations_size, _lp.predator_brain_cells, _lp.predator_actions_size, _lp.population_size, _lp.network_type)
-    # Initialize Genetic Algorithms with random genes
-    GA_prey.initial_population()
-    GA_predator.initial_population()
+    for s in [0,1]:
 
-    # GAs['prey'].load_population_from_file('genes_9.pkl', 'prey')
-    # GAs['predator'].load_population_from_file('genes_9.pkl', 'predator')
+        # SET LEARNING PARAMS HERE
+        if s == 0:
+            prefix = 'TP'
+            _lp.mating_method = 'Two Points'
+        elif s == 1:
+            prefix = 'TPpP'
+            _lp.mating_method = 'Two Points Per Part'
 
-    # _lp.hotkey_listener.add('<ctrl>+<alt>+a', lambda: save_genes({'prey': GA_prey, 'predator': GA_predator}, _lp.save_ID))
+        save_learning_parameters(f'{prefix}')
 
-    for generation in range(_lp.number_of_generations):
-        prey_genes = GA_prey.to_genes()
-        predator_genes = GA_predator.to_genes()
+        for k in range(10):
+            print(f"{prefix} - {k}")
+            # Create Genetic Algorithms for prey swarm and predator swarm
+            GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, _lp.network_type)
+            GA_predator = GeneticAlgorithm(_lp.predator_observations_size, _lp.predator_brain_cells, _lp.predator_actions_size, _lp.population_size, _lp.network_type)
 
-        prey_genes_pointer = float(prey_genes.__array_interface__['data'][0])
-        predator_genes_pointer = float(predator_genes.__array_interface__['data'][0])
+            # Initialize Genetic Algorithms with random genes
+            GA_prey.initial_population()
+            GA_predator.initial_population()
+            # GAs['prey'].load_population_from_file('genes_9.pkl', 'prey')
+            # GAs['predator'].load_population_from_file('genes_9.pkl', 'predator')
 
-        # Evaluate genes
-        env_manager.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
-        env_manager.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
-        env_manager.run_single_episode()
+            # Run N generations
+            for generation in range(_lp.number_of_generations):
+                prey_genes = GA_prey.to_genes()
+                predator_genes = GA_predator.to_genes()
 
-        GA_prey.calc_fitness(prey_fitness)
-        GA_predator.calc_fitness(predator_fitness)
+                prey_genes_pointer = float(prey_genes.__array_interface__['data'][0])
+                predator_genes_pointer = float(predator_genes.__array_interface__['data'][0])
 
-        if live_plot:
-            live_plot.update({'prey1': [np.average(prey_fitness), np.max(prey_fitness), np.min(prey_fitness)],
-                              'prey2': [prey_stats[0], prey_stats[2]],
-                              'prey3': [prey_stats[1], prey_stats[4]],
-                              'predator1': [np.average(predator_fitness), np.max(predator_fitness), np.min(predator_fitness)],
-                              'predator2': [predator_stats[1], predator_stats[2], predator_stats[3], predator_stats[4]]
-                              })
+                # Evaluate genes
+                env_manager.set_prey_genes(prey_genes_pointer, prey_genes.shape[0], prey_genes.shape[1])
+                env_manager.set_predator_genes(predator_genes_pointer, predator_genes.shape[0], predator_genes.shape[1])
+                env_manager.run_single_episode()
 
-        GA_prey.next_generation()
-        GA_predator.next_generation()
+                GA_prey.calc_fitness(prey_fitness)
+                GA_predator.calc_fitness(predator_fitness)
 
-    sleep(1)
-    # Save experiment data...
-    save_genes({'prey': GA_prey, 'predator': GA_predator}, save_ID)
-    save_learning_parameters(save_ID)
-    live_plot.save(save_ID)
+                if live_plot:
+                    live_plot.update({'prey1': [np.average(prey_fitness), np.max(prey_fitness), np.min(prey_fitness)],
+                                      'prey2': [prey_stats[0], prey_stats[2]],
+                                      'prey3': [prey_stats[1], prey_stats[4]],
+                                      'predator1': [np.average(predator_fitness), np.max(predator_fitness), np.min(predator_fitness)],
+                                      'predator2': [predator_stats[1], predator_stats[2], predator_stats[3], predator_stats[4]]
+                                      })
 
-    sleep(2)
+                # GA_prey.next_generation()
+                GA_predator.next_generation()
 
-    if live_plot:
-        live_plot.close()
+            sleep(1)
+            # Save experiment data...
+            save_genes({'prey': GA_prey, 'predator': GA_predator}, f'{prefix}_{k}')
+            if live_plot:
+                live_plot.save(f'{prefix}_{k}')
+
+            sleep(1)
+            # Reset plots
+            if live_plot:
+                live_plot.update({'prey1': None, 'prey2': None, 'prey3': None, 'predator1': None, 'predator2': None})
+
+    # if live_plot:
+    #     live_plot.close()
 
 if __name__ == "__main__":
     main()
