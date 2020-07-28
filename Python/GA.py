@@ -84,13 +84,13 @@ class GeneticAlgorithm:
 
     def next_generation(self):
         # Selection
-        selected_individuals = GeneticAlgorithm.selection(self.population, method=_lp.selection_method)
+        selected_individuals = GeneticAlgorithm.selection(self.population, method=_lp.selection_method, tournament_size=_lp.tournament_size)
 
         # Pairing
         parents = GeneticAlgorithm.pairing(selected_individuals, method=_lp.pairing_method)
 
         # Crossover
-        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method) for x in range(len(parents))]
+        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, uniform_probability=_lp.uniform_probability) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
         # Mutations
@@ -104,7 +104,7 @@ class GeneticAlgorithm:
         self.population = next_gen
 
     @staticmethod
-    def selection(population, method='Fittest Half'):
+    def selection(population, method='Fittest Half', tournament_size=25):
         if method == 'Fittest Half':
             selected_individuals = [population[i] for i in range(len(population) // 2)]
             return selected_individuals
@@ -117,7 +117,7 @@ class GeneticAlgorithm:
         elif method == 'Tournament':
             selected_individuals = []
             for i in range(len(population)//2):
-                selected = random.choices(population, k=_lp.tournament_size)
+                selected = random.choices(population, k=tournament_size)
                 selected = max(selected, key=lambda indi: indi.fitness)
                 selected_individuals.append(selected)
             return selected_individuals
@@ -135,11 +135,38 @@ class GeneticAlgorithm:
         return parents
 
     @staticmethod
-    def mating(parents, method='None'):
+    def mating(parents, method='None', uniform_probability=0.5):
         offsprings = [parents[0].copy(), parents[1].copy()]
 
         if method == 'None':
             pass
+
+        elif method == 'Single Point':
+            a = random.randrange(0, parents[0].length)
+
+            offsprings[0].genotype[a:] = parents[1].genotype[a:]
+            offsprings[1].genotype[a:] = parents[0].genotype[a:]
+
+        elif method == 'Two Points':
+            a = random.randrange(0, parents[0].length)
+            b = random.randrange(0, parents[0].length)
+
+            if a > b:
+                a, b = b, a
+            b += 1
+
+            offsprings[0].genotype[a:b] = parents[1].genotype[a:b]
+            offsprings[1].genotype[a:b] = parents[0].genotype[a:b]
+
+        elif method == 'Single Point Per Part':
+            p_s = 0
+            for p_l in parents[0].lengths:
+                a = random.randrange(p_s, p_s + p_l)
+
+                offsprings[0].genotype[a:] = parents[1].genotype[a:]
+                offsprings[1].genotype[a:] = parents[0].genotype[a:]
+
+                p_s += p_l
 
         elif method == 'Two Points Per Part':
             p_s = 0
@@ -156,16 +183,11 @@ class GeneticAlgorithm:
 
                 p_s += p_l
 
-        elif method == 'Two Points':
-            a = random.randrange(0, parents[0].length)
-            b = random.randrange(0, parents[0].length)
-
-            if a > b:
-                a, b = b, a
-            b += 1
-
-            offsprings[0].genotype[a:b] = parents[1].genotype[a:b]
-            offsprings[1].genotype[a:b] = parents[0].genotype[a:b]
+        elif method == 'Uniform':
+            for a in range(parents[0].length):
+                if random.random() <= uniform_probability:
+                    offsprings[0].genotype[a] = parents[1].genotype[a]
+                    offsprings[1].genotype[a] = parents[0].genotype[a]
 
         else:
             raise Exception('Not such mating method found')
@@ -197,8 +219,8 @@ class GeneticAlgorithm:
             individual.genotype[p:p + (b-a) + 1] = (individual.genotype[a:b + 1])[0:individual.length - p]
 
         if random.random() <= gen_deletion_chance:
-            a = random.randrange(0, 20)
-            b = random.randrange(0, 20)
+            a = random.randrange(0, individual.length)
+            b = random.randrange(0, individual.length)
             if a>b:
                 a,b=b,a
             individual.genotype[a:a+(individual.length-b-1)] = individual.genotype[b+1:]

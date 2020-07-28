@@ -42,8 +42,12 @@ pairing_method = 'Fittest'
 
 # Crossover
 mating_method = 'None'
-# mating_method = 'Two Points Per Part'
+# mating_method = 'Single Point'
 # mating_method = 'Two Points'
+# mating_method = 'Single Point Per Part'
+# mating_method = 'Two Points Per Part'
+# mating_method = 'Uniform'
+uniform_probability = 0.5
 
 # Mutation
 gen_mutation_chance = 0.01
