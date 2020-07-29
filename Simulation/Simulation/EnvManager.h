@@ -6,7 +6,7 @@ class EnvManager
 {
 private:
 	std::vector<Simulation> simulations;
-	int num_envs = 20;
+	int num_envs = 5;
 
 	float** prey_genes;
 	float** predator_genes;

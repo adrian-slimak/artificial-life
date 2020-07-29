@@ -90,7 +90,7 @@ class GeneticAlgorithm:
         parents = GeneticAlgorithm.pairing(selected_individuals, method=_lp.pairing_method)
 
         # Crossover
-        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, uniform_probability=_lp.uniform_probability) for x in range(len(parents))]
+        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, uniform_probability=_lp.uniform_probability, lenghts=self.lengths) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
         # Mutations
@@ -135,7 +135,7 @@ class GeneticAlgorithm:
         return parents
 
     @staticmethod
-    def mating(parents, method='None', uniform_probability=0.5):
+    def mating(parents, method='None', uniform_probability=0.5, lenghts=None):
         offsprings = [parents[0].copy(), parents[1].copy()]
 
         if method == 'None':
@@ -160,7 +160,7 @@ class GeneticAlgorithm:
 
         elif method == 'Single Point Per Part':
             p_s = 0
-            for p_l in parents[0].lengths:
+            for p_l in lenghts:
                 a = random.randrange(p_s, p_s + p_l)
 
                 offsprings[0].genotype[a:] = parents[1].genotype[a:]
@@ -170,7 +170,7 @@ class GeneticAlgorithm:
 
         elif method == 'Two Points Per Part':
             p_s = 0
-            for p_l in parents[0].lengths:
+            for p_l in lenghts:
                 a = random.randrange(p_s, p_s + p_l)
                 b = random.randrange(p_s, p_s + p_l)
 

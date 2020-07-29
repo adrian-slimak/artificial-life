@@ -32,15 +32,27 @@ def main():
     env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
     env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
-    for s in [0,1]:
+    for s in [0,1,2,3,4,5]:
 
         # SET LEARNING PARAMS HERE
         if s == 0:
+            prefix = 'SP'
+            _lp.mating_method = 'Single Point'
+        elif s == 1:
+            prefix = 'SPpP'
+            _lp.mating_method = 'Single Point Per Part'
+        elif s == 2:
             prefix = 'TP'
             _lp.mating_method = 'Two Points'
-        elif s == 1:
+        elif s == 3:
             prefix = 'TPpP'
             _lp.mating_method = 'Two Points Per Part'
+        elif s == 4:
+            prefix = 'U0'
+            _lp.mating_method = 'Uniform'
+        elif s == 5:
+            prefix = 'N'
+            _lp.mating_method = 'None'
 
         save_learning_parameters(f'{prefix}')
 
