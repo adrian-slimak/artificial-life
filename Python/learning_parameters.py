@@ -14,7 +14,8 @@ number_of_generations = 1000
 prey_brain_cells = config['prey']['brain_cells']
 predator_brain_cells = config['predator']['brain_cells']
 
-network_type = config['prey']['brain_type'].lower()
+prey_network = config['prey']['brain_type'].lower()
+predator_network = config['predator']['brain_type'].lower()
 
 prey_observations_size = config["prey"]["vision"]["cells"] * (3 if config["environment"]["food"]["enabled"] else 2)
 predator_observations_size = config["predator"]["vision"]["cells"] * (3 if config["environment"]["food"]["enabled"] else 2)

@@ -7,15 +7,27 @@ import random
 def get_shapes_lengths(input_dim, units, output_dim, model_name='lstm', use_bias=True):
     shapes, lengths = None, None
 
-    k = 4 if model_name == 'lstm' else 1
-
-    if model_name == 'lstm' or model_name == 'rnn':
+    if model_name == 'rnn':
         if use_bias:
-            shapes = [[(input_dim, units * k), (units, units * k), (units, output_dim)], [(1, units * k), (1, output_dim)]]
-            lengths = [input_dim * units * k, units * units * k, units * output_dim, units * k, output_dim]
+            shapes = [[(input_dim, units), (units, units), (units, output_dim)], [(1, units), (1, output_dim)]]
+            lengths = [input_dim * units, units * units, units * output_dim, units, output_dim]
         else:
-            shapes = [[(input_dim, units * k), (units, units * k), (units, output_dim)]]
-            lengths = [input_dim * units * k, units * units * k, units * output_dim]
+            shapes = [[(input_dim, units), (units, units), (units, output_dim)]]
+            lengths = [input_dim * units, units * units, units * output_dim]
+
+    if model_name == 'lstm':
+        if use_bias:
+            shapes = [[(input_dim, units * 4), (units, units * 4), (units, output_dim)], [(1, units * 4), (1, output_dim)]]
+            lengths = [input_dim * units, input_dim * units, input_dim * units, input_dim * units,  # 4 gates
+                       units * units, units * units, units * units, units * units,  # 4 gates
+                       units * output_dim,
+                       units, units, units, units,  # 4 gates bias
+                       output_dim]
+        else:
+            shapes = [[(input_dim, units * 4), (units, units * 4), (units, output_dim)]]
+            lengths = [input_dim * units, input_dim * units, input_dim * units, input_dim * units,
+                       units * units, units * units, units * units, units * units,
+                       units * output_dim]
 
     if model_name == 'mlp':
         if use_bias:
@@ -68,7 +80,8 @@ class GeneticAlgorithm:
             individual.random_init()
 
     def load_population_from_file(self, file_name, brain_name='predator'):
-        self.population = [Genotype(self.lengths) for i in range(self.population_size)]
+        genotype_length = sum(self.lengths)
+        self.population = [Genotype(genotype_length) for i in range(self.population_size)]
 
         with open(f'results/models/{file_name}', 'rb') as f:
             models = load(f)[brain_name]
@@ -137,7 +150,6 @@ class GeneticAlgorithm:
     @staticmethod
     def mating(parents, method='None', uniform_probability=0.5, lenghts=None):
         offsprings = [parents[0].copy(), parents[1].copy()]
-
         if method == 'None':
             pass
 

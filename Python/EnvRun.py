@@ -32,7 +32,7 @@ def main():
     env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
     env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
-    for s in [0,1,2,3,4,5]:
+    for s in [0,1,3,4]:
 
         # SET LEARNING PARAMS HERE
         if s == 0:
@@ -59,8 +59,8 @@ def main():
         for k in range(10):
             print(f"{prefix} - {k}")
             # Create Genetic Algorithms for prey swarm and predator swarm
-            GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, _lp.network_type)
-            GA_predator = GeneticAlgorithm(_lp.predator_observations_size, _lp.predator_brain_cells, _lp.predator_actions_size, _lp.population_size, _lp.network_type)
+            GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, _lp.prey_network)
+            GA_predator = GeneticAlgorithm(_lp.predator_observations_size, _lp.predator_brain_cells, _lp.predator_actions_size, _lp.population_size, _lp.predator_network)
 
             # Initialize Genetic Algorithms with random genes
             GA_prey.initial_population()

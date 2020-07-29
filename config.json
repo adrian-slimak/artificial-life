@@ -20,7 +20,7 @@
         "count": 50,
 		
 		"brain_cells": 8,
-		"brain_type": "RNN",
+		"brain_type": "LSTM",
 
         "move_speed": 1,
         "turn_speed": 8,
@@ -58,7 +58,7 @@
         "count": 2,
 		
 		"brain_cells": 8,
-		"brain_type": "RNN",
+		"brain_type": "LSTM",
 
 		"move_speed": 3,
         "turn_speed": 6,

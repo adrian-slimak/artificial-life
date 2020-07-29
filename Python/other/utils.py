@@ -26,7 +26,9 @@ import learning_parameters as _lp
 def save_learning_parameters(id):
     save_string = f'# GENETIC ALGORITHM PARAMETERS' \
                   f'\n\n# Population' \
-                  f'\npopulation_size = 100' \
+                  f'\npopulation_size = {_lp.population_size}' \
+                  f'\nprey_network = {_lp.prey_network}' \
+                  f'\nprey_network = {_lp.predator_network}' \
                   f'\n\n# Random Init' \
                   f'\ninit_min_genes = {_lp.init_min_genes}' \
                   f'\ninit_max_genes = {_lp.init_max_genes}' \
