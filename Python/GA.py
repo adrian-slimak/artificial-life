@@ -9,33 +9,19 @@ def get_shapes_lengths(input_dim, units, output_dim, model_name='lstm', use_bias
 
     if model_name == 'rnn':
         if use_bias:
-            shapes = [[(input_dim, units), (units, units), (units, output_dim)], [(1, units), (1, output_dim)]]
-            lengths = [input_dim * units, units * units, units * output_dim, units, output_dim]
+            shapes = [[(input_dim, units), (units, units), (1, units)], [(units, output_dim), (1, output_dim)]]
+            lengths = [input_dim * units, units * units, units, units * output_dim, output_dim]
         else:
             shapes = [[(input_dim, units), (units, units), (units, output_dim)]]
             lengths = [input_dim * units, units * units, units * output_dim]
 
     if model_name == 'lstm':
         if use_bias:
-            shapes = [[(input_dim, units * 4), (units, units * 4), (units, output_dim)], [(1, units * 4), (1, output_dim)]]
-            lengths = [input_dim * units, input_dim * units, input_dim * units, input_dim * units,  # 4 gates
-                       units * units, units * units, units * units, units * units,  # 4 gates
-                       units * output_dim,
-                       units, units, units, units,  # 4 gates bias
-                       output_dim]
+            shapes = [[(input_dim, units * 4), (units, units * 4), (1, units * 4)], [(units, output_dim), (1, output_dim)]]
+            lengths = [input_dim * units * 4, units * units * 4, units * output_dim, units * 4, output_dim]
         else:
             shapes = [[(input_dim, units * 4), (units, units * 4), (units, output_dim)]]
-            lengths = [input_dim * units, input_dim * units, input_dim * units, input_dim * units,
-                       units * units, units * units, units * units, units * units,
-                       units * output_dim]
-
-    if model_name == 'mlp':
-        if use_bias:
-            shapes = [[(input_dim, units), (units, output_dim)], [(1, units), (1, output_dim)]]
-            lengths = [input_dim * units, units * output_dim, units, output_dim]
-        else:
-            shapes = [[(input_dim, units), (units, output_dim)]]
-            lengths = [input_dim * units, units * output_dim]
+            lengths = [input_dim * units * 4, units * units * 4, units * output_dim]
 
     return shapes, lengths
 
@@ -103,13 +89,14 @@ class GeneticAlgorithm:
         parents = GeneticAlgorithm.pairing(selected_individuals, method=_lp.pairing_method)
 
         # Crossover
-        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, uniform_probability=_lp.uniform_probability, lenghts=self.lengths) for x in range(len(parents))]
+        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, lenghts=self.lengths) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
         # Mutations
         next_gen = selected_individuals + offsprings
         for individual in next_gen:
-            GeneticAlgorithm.mutation(individual)
+            GeneticAlgorithm.mutation(individual, _lp.gen_mutation_chance, _lp.gen_deletion_chance,
+                                      _lp.deletion_chance, _lp.duplication_chance, _lp.fill_chance)
 
         if len(next_gen) != self.population_size:
             raise Exception("Next Gen size different than expected")
@@ -148,8 +135,9 @@ class GeneticAlgorithm:
         return parents
 
     @staticmethod
-    def mating(parents, method='None', uniform_probability=0.5, lenghts=None):
+    def mating(parents, method='None', lenghts=None):
         offsprings = [parents[0].copy(), parents[1].copy()]
+
         if method == 'None':
             pass
 
@@ -195,19 +183,14 @@ class GeneticAlgorithm:
 
                 p_s += p_l
 
-        elif method == 'Uniform':
-            for a in range(parents[0].length):
-                if random.random() <= uniform_probability:
-                    offsprings[0].genotype[a] = parents[1].genotype[a]
-                    offsprings[1].genotype[a] = parents[0].genotype[a]
-
         else:
             raise Exception('Not such mating method found')
 
         return offsprings
 
     @staticmethod
-    def mutation(individual, gen_mutation_chance=_lp.gen_mutation_chance, gen_deletion_chance=_lp.gen_deletion_chance, gen_duplication_chance=_lp.gen_duplication_chance):
+    def mutation(individual, gen_mutation_chance=_lp.gen_mutation_chance, gen_deletion_chance=_lp.gen_deletion_chance,
+                 deletion_chance=_lp.deletion_chance, duplication_chance=_lp.duplication_chance, fill_chance=_lp.fill_chance):
         # for gen_id in range(individual.length):
         #     if individual.genotype[gen_id] == 0.:
         #         if random.random() <= gen_duplication_chance:
@@ -219,10 +202,12 @@ class GeneticAlgorithm:
         #             individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
 
         for gen_id in range(individual.length):
+            if random.random() <= gen_deletion_chance:
+                individual.genotype[gen_id] = 0.
             if random.random() <= gen_mutation_chance:
-                individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
+                individual.genotype[gen_id] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale)
 
-        if random.random() <= gen_duplication_chance:
+        if random.random() <= duplication_chance:
             a = random.randrange(0, individual.length)
             b = random.randrange(0, individual.length)
             if a>b:
@@ -230,13 +215,21 @@ class GeneticAlgorithm:
             p = random.randrange(0, individual.length - 1)
             individual.genotype[p:p + (b-a) + 1] = (individual.genotype[a:b + 1])[0:individual.length - p]
 
-        if random.random() <= gen_deletion_chance:
+        if random.random() <= deletion_chance:
             a = random.randrange(0, individual.length)
             b = random.randrange(0, individual.length)
             if a>b:
                 a,b=b,a
             individual.genotype[a:a+(individual.length-b-1)] = individual.genotype[b+1:]
             individual.genotype[-(b - a + 1):] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale, size=b-a+1)
+
+        if random.random() <= fill_chance:
+            a = random.randrange(0, individual.length)
+            b = random.randrange(0, individual.length)
+            if a>b:
+                a,b=b,a
+            b+=1
+            individual.genotype[a:b] = np.random.normal(0, 1, b - a)
 
     def to_genes(self):
         genes = []

@@ -42,7 +42,7 @@
             "enabled": false,
             "food_sound_trigger": 8,
             "hear_cells": 12,
-            "hear_range": 150
+            "hear_range": 100
         },
 
         "energy":
