@@ -41,9 +41,6 @@ public:
 	static float confusion_ratio;
 
 public:
-	int number_alive;
-	bool *alive;
-
 	Eigen::ArrayXXf position;
 	Eigen::ArrayXXf norm;
 	Eigen::ArrayXf angle;
@@ -59,6 +56,7 @@ public:
 	int number_hunts;
 
 	int* attack_delays;
+	bool* sound_active;
 
 	PreySwarm* prey_swarm;
 	Distances* distances;

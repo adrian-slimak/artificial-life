@@ -100,7 +100,6 @@ void EnvManager::run_single_episode()
 			prey_stats[2] += simulations[n].prey_swarm->mean_dispersion;
 			//prey_stats[3] += simulations[n].prey_swarm->mean_eats;
 
-			predator_stats[0] += simulations[n].predator_swarm->number_alive;
 			predator_stats[1] += simulations[n].predator_swarm->mean_density;
 			predator_stats[2] += simulations[n].predator_swarm->mean_dispersion;
 			predator_stats[3] += simulations[n].predator_swarm->mean_attacks;
@@ -156,17 +155,17 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PreySwarm::hear_range = (float)json["prey"]["communication"]["hear_range"].number_value();
 	PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
 	PreySwarm::hear_cells = (int)json["prey"]["communication"]["hear_cells"].number_value();
-	PreySwarm::hear_cell_angle_rad = (float)(360.0 / PreySwarm::vision_cells) * Distances::deg2rad;
+	PreySwarm::hear_cell_angle_rad = (float)(360.0 / PreySwarm::hear_cells) * Distances::deg2rad;
 
 	PredatorSwarm::hear_range = (float)json["predator"]["communication"]["hear_range"].number_value();
 	PredatorSwarm::hear_range_squared = PredatorSwarm::hear_range * PredatorSwarm::hear_range;
 	PredatorSwarm::hear_cells = (int)json["predator"]["communication"]["hear_cells"].number_value();
-	PredatorSwarm::hear_cell_angle_rad = (float)(360.0 / PredatorSwarm::vision_cells) * Distances::deg2rad;
+	PredatorSwarm::hear_cell_angle_rad = (float)(360.0 / PredatorSwarm::hear_cells) * Distances::deg2rad;
 
 	bool food_enabled = json["environment"]["food"]["enabled"].bool_value();
 	PreySwarm::vision_size = PreySwarm::vision_cells * (food_enabled ? 3 : 2);
 	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (food_enabled ? 3 : 2);
-	PreySwarm::observations_size = PreySwarm::vision_size + (PreySwarm::communication_enabled ? PreySwarm::hear_cells : 0);
+	PreySwarm::observations_size = PreySwarm::vision_size + (PreySwarm::communication_enabled ? PreySwarm::hear_cells * 2 : 0);
 	PredatorSwarm::observations_size = PredatorSwarm::vision_size + (PredatorSwarm::communication_enabled ? PredatorSwarm::hear_cells : 0);
 
 	PreySwarm::actions_size = (int)json["prey"]["actions_size"].number_value();
