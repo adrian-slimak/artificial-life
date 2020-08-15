@@ -52,6 +52,7 @@ def main():
             _lp.fill_chance = 0.01
         elif s == 2:
             prefix = 'M1D1F1De3'
+            
             _lp.gen_mutation_chance = 0.01
             _lp.gen_deletion_chance = 0.0
             _lp.duplication_chance = 0.01
