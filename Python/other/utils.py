@@ -43,8 +43,10 @@ def save_learning_parameters(id):
                   f'\nmating_method = {_lp.mating_method}' \
                   f'\n\n# Mutation' \
                   f'\ngen_mutation_chance = {_lp.gen_mutation_chance}' \
-                  f'\ngen_duplication_chance = {_lp.gen_duplication_chance}' \
-                  f'\ngen_deletion_chance = {_lp.gen_deletion_chance}'
+                  f'\ngen_deletion_chance = {_lp.gen_deletion_chance}' \
+                  f'\nduplication_chance = {_lp.duplication_chance}' \
+                  f'\ndeletion_chance = {_lp.deletion_chance}' \
+                  f'\nfill_chance = {_lp.fill_chance}'
     with open(_lp.results_save_path+f'{id}_parameters.txt', 'w') as f:
         f.writelines(save_string)
 

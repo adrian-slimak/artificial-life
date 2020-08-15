@@ -16,47 +16,72 @@ def main():
 
     EnvManager.set_parameters(_lp.config_file_path)
 
-    # Get pointers to fitness array and stats array
-    prey_fitness = np.zeros(_lp.population_size).astype(np.float32)
-    predator_fitness = np.zeros(_lp.population_size).astype(np.float32)
-    prey_stats = np.zeros(5).astype(np.float32)
-    predator_stats = np.zeros(5).astype(np.float32)
-    prey_fitness_pointer = float(prey_fitness.__array_interface__['data'][0])
-    predator_fitness_pointer = float(predator_fitness.__array_interface__['data'][0])
-    prey_stats_pointer = float(prey_stats.__array_interface__['data'][0])
-    predator_stats_pointer = float(predator_stats.__array_interface__['data'][0])
+    for s in [0,1,2,3,4,5]:
+        # Get pointers to fitness array and stats array
+        prey_fitness = np.zeros(_lp.population_size).astype(np.float32)
+        predator_fitness = np.zeros(_lp.population_size).astype(np.float32)
+        prey_stats = np.zeros(5).astype(np.float32)
+        predator_stats = np.zeros(5).astype(np.float32)
+        prey_fitness_pointer = float(prey_fitness.__array_interface__['data'][0])
+        predator_fitness_pointer = float(predator_fitness.__array_interface__['data'][0])
+        prey_stats_pointer = float(prey_stats.__array_interface__['data'][0])
+        predator_stats_pointer = float(predator_stats.__array_interface__['data'][0])
 
-    # Create Environment Manager
-    env_manager = EnvManager.EnvManager()
-    # Set EnvManager pointers to fitness and stats arrays
-    env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
-    env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
-
-    for s in [0,1,3,4]:
-
+        # Create Environment Manager
+        env_manager = EnvManager.EnvManager()
+        # Set EnvManager pointers to fitness and stats arrays
+        env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
+        env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
+#10 dokończyć
+        prefix = 'test'
+        KKK = [0, 1, 2, 3, 4]
         # SET LEARNING PARAMS HERE
         if s == 0:
-            prefix = 'SP'
-            _lp.mating_method = 'Single Point'
+            prefix = 'M1D1F1De1'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.01
+            _lp.fill_chance = 0.01
         elif s == 1:
-            prefix = 'SPpP'
-            _lp.mating_method = 'Single Point Per Part'
+            prefix = 'M1D1F1De2'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.02
+            _lp.fill_chance = 0.01
         elif s == 2:
-            prefix = 'TP'
-            _lp.mating_method = 'Two Points'
+            prefix = 'M1D1F1De3'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.03
+            _lp.fill_chance = 0.01
         elif s == 3:
-            prefix = 'TPpP'
-            _lp.mating_method = 'Two Points Per Part'
+            prefix = 'M1D1F2De1'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.01
+            _lp.fill_chance = 0.02
         elif s == 4:
-            prefix = 'U0'
-            _lp.mating_method = 'Uniform'
+            prefix = 'M1D1F3De1'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.01
+            _lp.fill_chance = 0.03
         elif s == 5:
-            prefix = 'N'
-            _lp.mating_method = 'None'
+            prefix = 'M1D1F2De2'
+            _lp.gen_mutation_chance = 0.01
+            _lp.gen_deletion_chance = 0.0
+            _lp.duplication_chance = 0.01
+            _lp.deletion_chance = 0.02
+            _lp.fill_chance = 0.02
 
         save_learning_parameters(f'{prefix}')
 
-        for k in range(10):
+        for k in KKK:
             print(f"{prefix} - {k}")
             # Create Genetic Algorithms for prey swarm and predator swarm
             GA_prey = GeneticAlgorithm(_lp.prey_observations_size, _lp.prey_brain_cells, _lp.prey_actions_size, _lp.population_size, _lp.prey_network)
@@ -97,7 +122,7 @@ def main():
 
             sleep(1)
             # Save experiment data...
-            save_genes({'prey': GA_prey, 'predator': GA_predator}, f'{prefix}_{k}')
+            # save_genes({'prey': GA_prey, 'predator': GA_predator}, f'{prefix}_{k}')
             if live_plot:
                 live_plot.save(f'{prefix}_{k}')
 
