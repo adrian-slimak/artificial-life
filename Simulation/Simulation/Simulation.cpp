@@ -67,6 +67,7 @@ void Simulation::runSingleEpisode()
 	while (step < steps_without_predators)
 	{
 		this->distances->recalculate_prey_observations();
+		this->distances->prey_observations();
 
 		// Update Density and Dispersion
 		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
@@ -87,7 +88,10 @@ void Simulation::runSingleEpisode()
 	// Main simulation loop
 	while (step < simulation_steps)
 	{
+		this->distances->recalculate_prey_observations();
 		this->distances->recalculate_prey_predator_observations();
+		this->distances->prey_observations();
+		this->distances->predator_observations();
 
 		// Update Density and Dispersion
 		this->prey_swarm->update_stats();
@@ -116,8 +120,8 @@ void Simulation::runSingleEpisode()
 	int simulation_steps_predators = (simulation_steps - steps_without_predators);
 	this->predator_swarm->mean_density /= (float)simulation_steps_predators;
 	this->predator_swarm->mean_dispersion /= (float)simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
-	this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / (float)this->predator_swarm->number_alive;
-	this->predator_swarm->mean_hunts = this->predator_swarm->number_hunts / (float)this->predator_swarm->number_alive;
+	this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / PredatorSwarm::population_size;
+	this->predator_swarm->mean_hunts = this->predator_swarm->number_hunts / PredatorSwarm::population_size;
 }
 
 void Simulation::runInThread()

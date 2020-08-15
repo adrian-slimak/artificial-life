@@ -24,7 +24,7 @@ float PreySwarm::vision_cell_angle_rad = (float)(PreySwarm::vision_angle / PreyS
 
 bool PreySwarm::communication_enabled = false;
 int PreySwarm::food_sound_trigger = 5;
-float PreySwarm::hear_range = 150.f;
+float PreySwarm::hear_range = 100.f;
 float PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
 int PreySwarm::hear_cells = 12;
 float PreySwarm::hear_cell_angle_rad = (float)(360.f / PreySwarm::hear_cells) * Distances::deg2rad;
@@ -49,6 +49,9 @@ PreySwarm::PreySwarm()
 
 	angle = Eigen::ArrayXf(PreySwarm::population_size);
 
+	food_sound_active = new bool[PreySwarm::population_size];
+	predator_sound_active = new bool[PreySwarm::population_size];
+
 	//eat_delays = Eigen::ArrayXi(PreySwarm::population_size);
 	//plants_alive = new bool[PreySwarm::population_size];
 
@@ -71,7 +74,11 @@ void PreySwarm::reset()
 {
 	number_alive = population_size;
 	for (int i = 0; i < population_size; i++)
+	{
 		alive[i] = true;
+		food_sound_active[i] = false;
+		predator_sound_active[i] = false;
+	}
 
 	//for (int i = 0; i < population_size; i++)
 	//	plants_alive[i] = true;
@@ -81,7 +88,7 @@ void PreySwarm::reset()
 
 	angle.setRandom();
 	angle += 1.f;
-	angle *= 3.14;
+	angle *= 3.14f;
 
 	fitness = 0.f;
 	mean_density = 0.f;
@@ -148,27 +155,11 @@ void PreySwarm::update_stats()
 
 void PreySwarm::update_movement()
 {
-	//for (int p = 0; p < population_size; p++)
-	//{
-	//	if (alive[p])
-	//	{
-	//		angle[p] += model->y(p, 1) * turn_speed_rad;
-
-	//		angle[p] = angle[p] < 0.0f ? angle[p] + 6.18f : angle[p] > 6.18f ? angle[p] - 6.18f : angle[p];
-
-	//		norm(p, 0) = std::cos(angle[p]);
-	//		norm(p, 1) = std::sin(angle[p]);
-
-	//		position.row(p) += norm.row(p) * model->y(p, 0) * move_speed;
-	//	}
-	//}
-
-
 	angle += model->y.col(1).array() * turn_speed_rad;
 
 	angle = angle.unaryExpr([](float elem)
 	{
-		return elem < 0.0f ? elem + 6.18f : elem > 6.18f ? elem - 6.18f : elem;
+		return elem < 0.0f ? elem + 6.28f : elem > 6.28f ? elem - 6.28f : elem;
 	});
 
 	norm.col(0) = angle.cos();
@@ -180,6 +171,20 @@ void PreySwarm::update_movement()
 	{
 		return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
 	});
+
+	// COMMUNICATION
+	if (PredatorSwarm::communication_enabled)
+	{
+		int temp = 0;
+		for (int self_id = 0; self_id < PreySwarm::population_size; self_id++)
+		{
+			if (this->alive[self_id])
+			{
+				//this->food_sound_active[self_id] = (this->model->x.block(self_id,PreySwarm::vision_cells,1,PreySwarm::vision_cells).array() > 0.0f).sum()>=PreySwarm::food_sound_trigger;
+				this->predator_sound_active[self_id] = (this->model->x.block(self_id,PreySwarm::vision_cells,1,PreySwarm::vision_cells).array() > 0.0f).any();
+			}
+		}
+	}
 }
 
 //void PreySwarm::try_eat()

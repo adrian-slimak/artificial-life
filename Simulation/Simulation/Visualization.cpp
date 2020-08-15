@@ -125,21 +125,21 @@ void Visualization::update()
 
 void Visualization::renderSwarms()
 {
-	for (int i = 0; i < prey_swarm->population_size; i++)
-		if (prey_swarm->alive[i])
-			this->window->draw(*prey_sprites[i]);
-
-	for (int i = 0; i < predator_swarm->population_size; i++)
-		if (predator_swarm->alive[i])
-			this->window->draw(*predator_sprites[i]);
-
 	//for (int i = 0; i < prey_swarm->population_size; i++)
 	//	if (prey_swarm->alive[i])
 	//		renderView(i, true);
 
 	//for (int i = 0; i < predator_swarm->population_size; i++)
 	//	if (predator_swarm->alive[i])
-			renderView(0, true);
+		renderHear(0, true);
+		//renderView(0, false);
+
+	for (int i = 0; i < prey_swarm->population_size; i++)
+		if (prey_swarm->alive[i])
+			this->window->draw(*prey_sprites[i]);
+
+	for (int i = 0; i < predator_swarm->population_size; i++)
+			this->window->draw(*predator_sprites[i]);
 }
 
 void Visualization::renderView(int id, bool prey)
@@ -171,6 +171,7 @@ void Visualization::renderView(int id, bool prey)
 		x = predator_swarm->position(id, 0) + 256;
 		y = predator_swarm->position(id, 1) + 256;
 		arc_start = (predator_swarm->angle[id] - PredatorSwarm::vision_angle_half_rad);
+		range = PredatorSwarm::vision_range;
 	}
 
 	sf::Vector2f pt0(x,y);
@@ -201,6 +202,82 @@ void Visualization::renderView(int id, bool prey)
 		a_rad = arc_start + i * PreySwarm::vision_cell_angle_rad;
 		pt1 = sf::Vector2f(x + std::cos(a_rad) * range, y + std::sin(a_rad) * range);
 		a_rad = arc_start + (i + 1) * PreySwarm::vision_cell_angle_rad;
+		pt2 = sf::Vector2f(x + std::cos(a_rad) * range, y + std::sin(a_rad) * range);
+
+		convex.setPoint(1, pt1);
+		convex.setPoint(2, pt2);
+		this->window->draw(convex);
+
+		line[0].position = pt1;
+		line[1].position = pt2;
+		this->window->draw(line, 2, sf::Lines);
+		line[0].position = pt0;
+		this->window->draw(line, 2, sf::Lines);
+	}
+
+	line[0].position = pt0;
+	line[1].position = sf::Vector2f(x + std::cos(arc_start) * range, y + std::sin(arc_start) * range);
+	this->window->draw(line, 2, sf::Lines);
+}
+
+void Visualization::renderHear(int id, bool prey)
+{
+	sf::Color yellow = sf::Color::Yellow;
+	yellow.a = 128;
+	sf::Color magenta = sf::Color::Magenta;
+	magenta.a = 128;
+	sf::Vertex line[] = { sf::Vertex(sf::Vector2f(10, 10)), sf::Vertex(sf::Vector2f(150, 150)) };
+	sf::ConvexShape convex;
+	convex.setPointCount(3);
+	convex.setFillColor(sf::Color(128, 128, 128, 128));
+
+	float a_rad = 0.f;
+	float x = 0.f;
+	float y = 0.f;
+	float arc_start = 0.f;
+	float range = 0.f;
+
+	if (prey)
+	{
+		x = prey_swarm->position(id, 0) + 256;
+		y = prey_swarm->position(id, 1) + 256;
+		arc_start = (prey_swarm->angle[id] - 3.14f);
+		range = PreySwarm::vision_range;
+	}
+	else
+	{
+		x = predator_swarm->position(id, 0) + 256;
+		y = predator_swarm->position(id, 1) + 256;
+		arc_start = (predator_swarm->angle[id] - 3.14f);
+		range = PredatorSwarm::vision_range;
+	}
+
+	sf::Vector2f pt0(x, y);
+	sf::Vector2f pt1;
+	sf::Vector2f pt2;
+
+	convex.setPoint(0, sf::Vector2f(x, y));
+
+	for (int i = 0; i < 12; i++)
+	{
+		convex.setFillColor(sf::Color(128, 128, 128, 128));
+
+		if (prey)
+		{
+			if (prey_swarm->model->x(id, PreySwarm::vision_size + i * 2) > 0.f)
+				convex.setFillColor(yellow);
+			if (prey_swarm->model->x(id, PreySwarm::vision_size + i*2 + 1) > 0.f)
+				convex.setFillColor(magenta);
+		}
+		else
+		{
+			if (predator_swarm->model->x(id, PredatorSwarm::vision_size + i) > 0.f)
+				convex.setFillColor(yellow);
+		}
+
+		a_rad = arc_start + i * PreySwarm::hear_cell_angle_rad;
+		pt1 = sf::Vector2f(x + std::cos(a_rad) * range, y + std::sin(a_rad) * range);
+		a_rad = arc_start + (i + 1) * PreySwarm::hear_cell_angle_rad;
 		pt2 = sf::Vector2f(x + std::cos(a_rad) * range, y + std::sin(a_rad) * range);
 
 		convex.setPoint(1, pt1);

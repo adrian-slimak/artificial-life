@@ -53,6 +53,9 @@ public:
 	//Eigen::ArrayXi eat_delays;
 	//Eigen::ArrayXf energy;
 
+	bool* food_sound_active;
+	bool* predator_sound_active;
+
 	float fitness;
 	float mean_density;
 	float mean_dispersion;

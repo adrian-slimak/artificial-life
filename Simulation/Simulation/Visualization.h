@@ -33,5 +33,6 @@ public:
 
 	void renderSwarms();
 	void renderView(int id, bool prey);
+	void renderHear(int id, bool prey);
 	void render();
 };

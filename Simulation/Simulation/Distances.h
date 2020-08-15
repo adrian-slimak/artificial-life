@@ -26,9 +26,8 @@ public:
 	~Distances();
 
 	void recalculate_prey_observations();
-	void recalculate_prey_observations_2();
 	void recalculate_prey_predator_observations();
-	void recalculate_prey_predator_observations_2();
-	void recalculate_plant_observations();
+	void prey_observations();
+	void predator_observations();
 };
 #endif

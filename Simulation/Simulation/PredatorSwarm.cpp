@@ -15,7 +15,7 @@ int PredatorSwarm::observations_size = 26;
 int PredatorSwarm::actions_size = 2;
 
 int PredatorSwarm::vision_size = 26;
-float PredatorSwarm::vision_range = 100.f;
+float PredatorSwarm::vision_range = 200.f;
 float PredatorSwarm::vision_range_squared = PredatorSwarm::vision_range * PredatorSwarm::vision_range;
 float PredatorSwarm::vision_angle = 182.f;
 float PredatorSwarm::vision_angle_half_rad = (PredatorSwarm::vision_angle/2.f) * Distances::deg2rad;
@@ -23,7 +23,7 @@ int PredatorSwarm::vision_cells = 13;
 float PredatorSwarm::vision_cell_angle_rad = (float)(PredatorSwarm::vision_angle / PredatorSwarm::vision_cells) * Distances::deg2rad;
 
 bool PredatorSwarm::communication_enabled = false;
-float PredatorSwarm::hear_range = 150.f;
+float PredatorSwarm::hear_range = 200.f;
 float PredatorSwarm::hear_range_squared = PredatorSwarm::hear_range * PredatorSwarm::hear_range;
 int PredatorSwarm::hear_cells = 12;
 float PredatorSwarm::hear_cell_angle_rad = (float)(360.f / PredatorSwarm::hear_cells) * Distances::deg2rad;
@@ -41,8 +41,6 @@ float PredatorSwarm::confusion_ratio = 1.f;
 
 PredatorSwarm::PredatorSwarm()
 {
-	alive = new bool[PredatorSwarm::population_size];
-
 	position = Eigen::ArrayXXf(PredatorSwarm::population_size, 2);
 
 	norm = Eigen::ArrayXXf(PredatorSwarm::population_size, 2);
@@ -50,6 +48,8 @@ PredatorSwarm::PredatorSwarm()
 	angle = Eigen::ArrayXf(PredatorSwarm::population_size);
 
 	attack_delays = new int[PredatorSwarm::population_size];
+
+	sound_active = new bool[PredatorSwarm::population_size];
 
 	if (network_type == NetworkType::_LSTM)
 		this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
@@ -68,16 +68,12 @@ PredatorSwarm::~PredatorSwarm()
 
 void PredatorSwarm::reset()
 {
-	number_alive = population_size;
-	for (int i = 0; i < population_size; i++)
-		alive[i] = true;
-
 	position.setRandom();
 	position *= Simulation::world_size_half;
 
 	angle.setRandom();
 	angle += 1.f;
-	angle *= 3.14;
+	angle *= 3.14f;
 
 	fitness = 0.f;
 	mean_density = 0.f;
@@ -86,7 +82,10 @@ void PredatorSwarm::reset()
 	number_hunts = 0;
 
 	for (int i = 0; i < PredatorSwarm::population_size; i++)
+	{
 		attack_delays[i] = 0;
+		sound_active[i] = false;
+	}
 
 	this->model->reset();
 }
@@ -131,36 +130,18 @@ void PredatorSwarm::update_stats()
 		dispersion += std::sqrt(min_dist);
 	}
 
-	if (number_alive > 0)
-	{
-		this->mean_density += (density / (float)number_alive);
-		this->mean_dispersion += (dispersion / (float)number_alive);
-	}
+	this->mean_density += (density / (float)PredatorSwarm::population_size);
+	this->mean_dispersion += (dispersion / (float)PredatorSwarm::population_size);
 }
 
 
 void PredatorSwarm::update_movement()
 {
-	//for (int p = 0; p < population_size; p++)
-	//{
-	//	if (alive[p])
-	//	{
-	//		angle[p] += model->y(p, 1) * turn_speed_rad;
-
-	//		angle[p] = angle[p] < 0.0f ? angle[p] + 6.18f : angle[p] > 6.18f ? angle[p] - 6.18f : angle[p];
-
-	//		norm(p, 0) = std::cos(angle[p]);
-	//		norm(p, 1) = std::sin(angle[p]);
-
-	//		position.row(p) += norm.row(p) * model->y(p, 0) * move_speed;
-	//	}
-	//}
-
 	angle += model->y.col(1).array() * turn_speed_rad;
 
 	angle = angle.unaryExpr([](float elem)
 	{
-		return elem < 0.0f ? elem + 6.18f : elem > 6.18f ? elem - 6.18f : elem;
+		return elem < 0.0f ? elem + 6.28f : elem > 6.28f ? elem - 6.28f : elem;
 	});
 
 	norm.col(0) = angle.cos();
@@ -172,6 +153,15 @@ void PredatorSwarm::update_movement()
 	{
 		return elem < -Simulation::world_size_half ? elem + Simulation::world_size : elem > Simulation::world_size_half ? elem - Simulation::world_size : elem;
 	});
+
+	// COMMUNICATION
+	if (PredatorSwarm::communication_enabled)
+	{
+		for (int predator_id = 0; predator_id < PredatorSwarm::population_size; predator_id++)
+		{
+			this->sound_active[predator_id] = this->model->y(predator_id, 2) > 0?true:false;
+		}
+	}
 }
 
 void PredatorSwarm::try_hunt()
@@ -180,7 +170,7 @@ void PredatorSwarm::try_hunt()
 	float min_dist;
 	int near_target_preys;
 
-	for (int predator_id = 0; predator_id < population_size; predator_id++)
+	for (int predator_id = 0; predator_id < PredatorSwarm::population_size; predator_id++)
 	{
 		// If attack delay is greater than 0, predator cant attack yet
 		if (attack_delays[predator_id] > 0)
@@ -188,15 +178,16 @@ void PredatorSwarm::try_hunt()
 		else
 		{
 			target_id = -1;
-			min_dist = 1000000.f;
+			//min_dist = 1000000.f;
+			min_dist = PredatorSwarm::attack_range_squared;
 
 			// Predator can attack now, find closest target
 			for (int prey_id = 0; prey_id < PreySwarm::population_size; prey_id++)
 			{
 				if (prey_swarm->alive[prey_id] &&
-					distances->predator_prey_distances[predator_id][prey_id] < PredatorSwarm::attack_range_squared &&
-					std::abs(distances->predator_prey_angles[predator_id][prey_id]) < PredatorSwarm::vision_angle_half_rad &&
-					distances->predator_prey_distances[predator_id][prey_id] < min_dist)
+					//distances->predator_prey_distances[predator_id][prey_id] < PredatorSwarm::attack_range_squared &&
+					distances->predator_prey_distances[predator_id][prey_id] < min_dist &&
+					std::abs(distances->predator_prey_angles[predator_id][prey_id]) < PredatorSwarm::vision_angle_half_rad)
 				{
 					min_dist = distances->predator_prey_distances[predator_id][prey_id];
 					target_id = prey_id;
@@ -222,7 +213,7 @@ void PredatorSwarm::try_hunt()
 				}
 				
 				// Confusion effect
-				if ((float)std::rand() / RAND_MAX < 1.f / near_target_preys)
+				if (((float)std::rand() / RAND_MAX) < (1.f / near_target_preys))
 				{
 					// Attack successful
 					prey_swarm->alive[target_id] = false;
