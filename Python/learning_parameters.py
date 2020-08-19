@@ -38,8 +38,7 @@ print(f'predator {predator_actions_size}')
 population_size = 100
 
 # Random Init
-init_min_genes = 0.98
-init_max_genes = 0.99
+init_genes = 1.
 init_loc = 0.
 init_scale = 1.
 
@@ -48,6 +47,7 @@ selection_method = 'Fittest Half'
 # selection_method = 'Roulette Wheel'
 # selection_method = 'Tournament'
 tournament_size = 30
+elite_size = 0
 
 # Pairing
 pairing_method = 'Fittest'
@@ -58,10 +58,11 @@ mating_method = 'None'
 # mating_method = 'Two Points'
 # mating_method = 'Single Point Per Part'
 # mating_method = 'Two Points Per Part'
+crossover_probability = 0.5
 
 # Mutation
 gen_mutation_chance = 0.01
 gen_deletion_chance = 0.0
-duplication_chance = 0.02
-deletion_chance = 0.02
+duplication_chance = 0.0
+deletion_chance = 0.0
 fill_chance = 0.0
