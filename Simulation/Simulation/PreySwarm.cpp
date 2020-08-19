@@ -56,9 +56,9 @@ PreySwarm::PreySwarm()
 	//plants_alive = new bool[PreySwarm::population_size];
 
 	if (network_type == NetworkType::_LSTM)
-		this->model = new LSTM(observations_size, brain_cells, actions_size, population_size);
+		this->model = new LSTM(PreySwarm::observations_size, PreySwarm::brain_cells, PreySwarm::actions_size, PreySwarm::population_size);
 	else
-		this->model = new RNN(observations_size, brain_cells, actions_size, population_size);
+		this->model = new RNN(PreySwarm::observations_size, PreySwarm::brain_cells, PreySwarm::actions_size, PreySwarm::population_size);
 
 	this->model->build();
 }
@@ -159,7 +159,7 @@ void PreySwarm::update_movement()
 
 	angle = angle.unaryExpr([](float elem)
 	{
-		return elem < 0.0f ? elem + 6.28f : elem > 6.28f ? elem - 6.28f : elem;
+		return elem < 0.0f ? elem + Distances::PI_2 : elem > Distances::PI_2 ? elem - Distances::PI_2 : elem;
 	});
 
 	norm.col(0) = angle.cos();
