@@ -24,12 +24,6 @@ RNN::~RNN()
 
 void RNN::build()
 {
-    this->W.resize(0,0);
-    this->U.resize(0,0);
-    this->b.resize(0,0);
-    this->Wy.resize(0,0);
-    this->by.resize(0,0);
-
 	this->W = Matrix::Random(input_dim, lstm_units);
 	this->U = Matrix::Random(lstm_units, lstm_units);
 	this->b = Vector::Random(lstm_units);
@@ -40,6 +34,12 @@ void RNN::build()
 
 void RNN::build(float* genes)
 {
+	//this->W.resize(0,0);
+	//this->U.resize(0,0);
+	//this->b.resize(0,0);
+	//this->Wy.resize(0,0);
+	//this->by.resize(0,0);
+
 	this->W = Eigen::Map<Eigen::MatrixXf>(genes, input_dim, lstm_units);
 	genes += W.size();
 	this->U = Eigen::Map<Eigen::MatrixXf>(genes, lstm_units, lstm_units);

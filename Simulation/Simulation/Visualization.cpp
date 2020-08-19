@@ -132,7 +132,7 @@ void Visualization::renderSwarms()
 	//for (int i = 0; i < predator_swarm->population_size; i++)
 	//	if (predator_swarm->alive[i])
 		renderHear(0, true);
-		//renderView(0, false);
+		//renderView(0, true);
 
 	for (int i = 0; i < prey_swarm->population_size; i++)
 		if (prey_swarm->alive[i])

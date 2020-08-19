@@ -35,11 +35,11 @@ void LSTM::build()
 
 void LSTM::build(float* genes)
 {
-    this->W.resize(0,0);
-    this->U.resize(0,0);
-    this->b.resize(0,0);
-    this->Wy.resize(0,0);
-    this->by.resize(0,0);
+    //this->W.resize(0,0);
+    //this->U.resize(0,0);
+    //this->b.resize(0,0);
+    //this->Wy.resize(0,0);
+    //this->by.resize(0,0);
 
 	this->W = Eigen::Map<Eigen::MatrixXf>(genes, input_dim, lstm_units * 4);
 	genes += W.size();

@@ -9,6 +9,8 @@ class Distances
 public:
 	static const float deg2rad;
 	static const float rad2deg;
+	static const float PI;
+	static const float PI_2;
 
 	PreySwarm *prey_swarm = nullptr;
 	PredatorSwarm *predator_swarm = nullptr;

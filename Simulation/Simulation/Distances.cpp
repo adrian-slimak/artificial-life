@@ -5,8 +5,11 @@
 
 #include <iostream>
 
-const float Distances::deg2rad = 3.14f / 180.f;
-const float Distances::rad2deg = 180.f / 3.14f;
+const float Distances::PI = 3.14159265358979323846f;
+const float Distances::PI_2 = Distances::PI * 2.f;
+
+const float Distances::deg2rad = Distances::PI / 180.f;
+const float Distances::rad2deg = 180.f / Distances::PI;
 
 Distances::Distances()
 {
@@ -119,7 +122,7 @@ void Distances::recalculate_prey_observations()
 					if (PreySwarm::communication_enabled)
 					{
 						// Update hearing observations for specific hear cell
-						obs_id = int((3.14f - angle) / PreySwarm::hear_cell_angle_rad) * 2 + PreySwarm::vision_size;
+						obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) * 2 + PreySwarm::vision_size;
 						if (this->prey_swarm->food_sound_active[b])
 							this->prey_swarm->model->x(a, obs_id) = 1.f;
 						if (this->prey_swarm->predator_sound_active[b])
@@ -142,7 +145,7 @@ void Distances::recalculate_prey_observations()
 					if (PreySwarm::communication_enabled)
 					{
 						// Update hearing observations for specific hear cell
-						obs_id = int((3.14f - angle) / PreySwarm::hear_cell_angle_rad) * 2 + PreySwarm::vision_size;
+						obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) * 2 + PreySwarm::vision_size;
 						if (this->prey_swarm->food_sound_active[a])
 							this->prey_swarm->model->x(b, obs_id) = 1.f;
 						if (this->prey_swarm->predator_sound_active[b])
@@ -166,7 +169,7 @@ void Distances::recalculate_prey_predator_observations()
 {
 	this->predator_swarm->model->x.leftCols(PredatorSwarm::vision_size).setConstant(1000000.f);
 	if(PredatorSwarm::communication_enabled)
-		this->predator_swarm->model->x.block(0,PredatorSwarm::vision_size,PredatorSwarm::population_size,PredatorSwarm::hear_cells).setConstant(0);
+		this->predator_swarm->model->x.block(0,PredatorSwarm::vision_size, PredatorSwarm::population_size, PredatorSwarm::hear_cells).setConstant(0);
 
 	float Ux;
 	float Uy;
@@ -285,11 +288,11 @@ void Distances::recalculate_prey_predator_observations()
 						this->predator_swarm->model->x(a, obs_id) = distance;
 				}
 
-				////Communication
+				//Communication
 				if (PredatorSwarm::communication_enabled)
 				{
 					// Update hearing observations for specific hear cell
-					obs_id = int((3.14f - angle) / PredatorSwarm::hear_cell_angle_rad) + PredatorSwarm::vision_size;
+					obs_id = int((Distances::PI - angle) / PredatorSwarm::hear_cell_angle_rad) + PredatorSwarm::vision_size;
 					if (this->predator_swarm->sound_active[b])
 						this->predator_swarm->model->x(a, obs_id) = 1.f;
 				}
@@ -314,7 +317,7 @@ void Distances::recalculate_prey_predator_observations()
 				if (PredatorSwarm::communication_enabled)
 				{
 					// Update hearing observations for specific hear cell
-					obs_id = int((3.14f - angle) / PredatorSwarm::hear_cell_angle_rad) + PredatorSwarm::vision_size;
+					obs_id = int((Distances::PI - angle) / PredatorSwarm::hear_cell_angle_rad) + PredatorSwarm::vision_size;
 					if (this->predator_swarm->sound_active[a])
 						this->predator_swarm->model->x(b, obs_id) = 1.f;
 				}
