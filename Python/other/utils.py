@@ -30,17 +30,18 @@ def save_learning_parameters(id):
                   f'\nprey_network = {_lp.prey_network}' \
                   f'\nprey_network = {_lp.predator_network}' \
                   f'\n\n# Random Init' \
-                  f'\ninit_min_genes = {_lp.init_min_genes}' \
-                  f'\ninit_max_genes = {_lp.init_max_genes}' \
+                  f'\ninit_genes = {_lp.init_genes}' \
                   f'\ninit_loc = {_lp.init_loc}' \
                   f'\ninit_scale = {_lp.init_scale}' \
                   f'\n\n# Selection' \
                   f'\nselection_method = {_lp.selection_method}' \
                   f'\ntournament_size = {_lp.tournament_size}' \
+                  f'\nelite_size = {_lp.elite_size}' \
                   f'\n\n# Pairing' \
                   f'\npairing_method = {_lp.pairing_method}' \
                   f'\n\n# Crossover' \
                   f'\nmating_method = {_lp.mating_method}' \
+                  f'\ncrossover_probability = {_lp.crossover_probability}' \
                   f'\n\n# Mutation' \
                   f'\ngen_mutation_chance = {_lp.gen_mutation_chance}' \
                   f'\ngen_deletion_chance = {_lp.gen_deletion_chance}' \
