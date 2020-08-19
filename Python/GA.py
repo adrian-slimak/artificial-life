@@ -18,7 +18,7 @@ def get_shapes_lengths(input_dim, units, output_dim, model_name='lstm', use_bias
     if model_name == 'lstm':
         if use_bias:
             shapes = [[(input_dim, units * 4), (units, units * 4), (1, units * 4)], [(units, output_dim), (1, output_dim)]]
-            lengths = [input_dim * units * 4, units * units * 4, units * output_dim, units * 4, output_dim]
+            lengths = [input_dim * units * 4, units * units * 4, units * 4, units * output_dim, output_dim]
         else:
             shapes = [[(input_dim, units * 4), (units, units * 4), (units, output_dim)]]
             lengths = [input_dim * units * 4, units * units * 4, units * output_dim]
@@ -37,11 +37,10 @@ class Genotype:
         new_one.genotype = self.genotype.copy()
         return new_one
 
-    def random_init(self, min=_lp.init_min_genes, max=_lp.init_max_genes, loc=_lp.init_loc, scale=_lp.init_scale):
+    def random_init(self, init_genes=_lp.init_genes, loc=_lp.init_loc, scale=_lp.init_scale):
         self.genotype = np.zeros(self.length, dtype=np.float32)
-        percentOfGenes = random.uniform(min, max)
-        numOfGenes = int(self.length * percentOfGenes)
-        genesIdx = random.sample(range(0, self.length - 1), numOfGenes)
+        numOfGenes = int(self.length * init_genes)
+        genesIdx = random.sample(range(0, self.length), numOfGenes)
         genesVals = np.random.normal(loc=loc, scale=scale, size=self.length)
         # genesVals = np.random.uniform(low=0., high=1., size=100)
         for id in genesIdx:
@@ -63,7 +62,7 @@ class GeneticAlgorithm:
         genotype_length = sum(self.lengths)
         self.population = [Genotype(genotype_length) for i in range(self.population_size)]
         for individual in self.population:
-            individual.random_init()
+            individual.random_init(init_genes=_lp.init_genes, scale=_lp.init_scale)
 
     def load_population_from_file(self, file_name, brain_name='predator'):
         genotype_length = sum(self.lengths)
@@ -85,11 +84,14 @@ class GeneticAlgorithm:
         # Selection
         selected_individuals = GeneticAlgorithm.selection(self.population, method=_lp.selection_method, tournament_size=_lp.tournament_size)
 
+        # Elite selection
+        elite = [self.population[i].copy() for i in range(_lp.elite_size)]
+
         # Pairing
         parents = GeneticAlgorithm.pairing(selected_individuals, method=_lp.pairing_method)
 
         # Crossover
-        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, lenghts=self.lengths) for x in range(len(parents))]
+        offsprings = [GeneticAlgorithm.mating(parents[x], method=_lp.mating_method, probability=_lp.crossover_probability, lenghts=self.lengths) for x in range(len(parents))]
         offsprings = [individual for sublist in offsprings for individual in sublist]
 
         # Mutations
@@ -97,6 +99,9 @@ class GeneticAlgorithm:
         for individual in next_gen:
             GeneticAlgorithm.mutation(individual, _lp.gen_mutation_chance, _lp.gen_deletion_chance,
                                       _lp.deletion_chance, _lp.duplication_chance, _lp.fill_chance)
+
+        # Elite selection
+        selected_individuals[-_lp.elite_size:] = elite
 
         if len(next_gen) != self.population_size:
             raise Exception("Next Gen size different than expected")
@@ -135,8 +140,11 @@ class GeneticAlgorithm:
         return parents
 
     @staticmethod
-    def mating(parents, method='None', lenghts=None):
+    def mating(parents, method='None', probability=1., lenghts=None):
         offsprings = [parents[0].copy(), parents[1].copy()]
+
+        if random.random() > probability:
+            return offsprings
 
         if method == 'None':
             pass
