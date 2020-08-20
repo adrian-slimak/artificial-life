@@ -114,6 +114,20 @@ void EnvManager::run_single_episode()
 	}
 }
 
+void EnvManager::create_visualization(const char *vis_file_path)
+{
+	// Needed to use random in C++
+	srand(time(NULL));
+
+	Simulation simulation = Simulation();
+
+	// Build models from Genotypes to evaluate
+	simulation.setModels(prey_genes[0], predator_genes[0]);
+
+	// Start simulations
+	simulation.create_visualization(vis_file_path);
+}
+
 void EnvManager::set_parameters(const char *params_file_path)
 {
 	std::string err;

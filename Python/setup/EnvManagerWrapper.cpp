@@ -87,6 +87,18 @@ static PyObject * PyEnvManager_set_stats_pointers(PyEnvManager* self, PyObject* 
     return Py_None;
 }
 
+static PyObject * PyEnvManager_create_visualization(PyEnvManager* self, PyObject* args)
+{
+    const char *vis_file_path;
+    Py_ssize_t size;
+
+    if (!PyArg_ParseTuple(args, "s#", &vis_file_path, &size))
+        return Py_False;
+
+    (self->ptrObj)->create_visualization(vis_file_path);
+    return Py_None;
+}
+
 // EnvManager object member methods
 static PyMethodDef PyEnvManager_methods[] = {
     { "run_single_episode", (PyCFunction)PyEnvManager_run_single_episode, METH_VARARGS, "Run single episode" },
@@ -94,6 +106,7 @@ static PyMethodDef PyEnvManager_methods[] = {
     { "set_predator_genes", (PyCFunction)PyEnvManager_set_predator_genes, METH_VARARGS, "Set weights (Genes) for predators models" },
     { "set_fitness_pointers", (PyCFunction)PyEnvManager_set_fitness_pointers, METH_VARARGS, "Set pointers to arrays to store fitness of models (Genes)" },
     { "set_stats_pointers", (PyCFunction)PyEnvManager_set_stats_pointers, METH_VARARGS, "Set pointers to arrays to store fitness of models (Genes)" },
+    { "create_visualization", (PyCFunction)PyEnvManager_create_visualization, METH_VARARGS, "Set pointers to arrays to store fitness of models (Genes)" },
 //    { "set_parameters", (PyCFunction)EnvManager_set_parameters, METH_VARARGS, "Set environment parameters" },
     {NULL, NULL, NULL}  /* Sentinel */
 };

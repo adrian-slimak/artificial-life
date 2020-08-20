@@ -31,4 +31,5 @@ public:
 	void set_stats_pointers(float* prey_stats, float* predator_stats);
 
 	void run_single_episode();
+	void create_visualization(const char *vis_file_path);
 };

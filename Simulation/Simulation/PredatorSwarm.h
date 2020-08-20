@@ -71,5 +71,6 @@ public:
 	void try_hunt();
 	void reset();
 	void set_model(float* predator_genes);
+	std::string to_string();
 };
 #endif

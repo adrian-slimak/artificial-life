@@ -76,5 +76,6 @@ public:
 	void try_eat();
 	void reset();
 	void set_model(float* prey_genes);
+	std::string to_string();
 };
 #endif

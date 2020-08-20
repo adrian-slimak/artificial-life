@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include <iostream>
+#include <fstream>
 
 float Simulation::world_size = 512.f;
 float Simulation::world_size_half = 256.f;
@@ -122,6 +123,61 @@ void Simulation::runSingleEpisode()
 	this->predator_swarm->mean_dispersion /= (float)simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
 	this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / PredatorSwarm::population_size;
 	this->predator_swarm->mean_hunts = this->predator_swarm->number_hunts / PredatorSwarm::population_size;
+}
+
+void Simulation::create_visualization(const char *vis_file_path)
+{
+	std::ofstream vis_file;
+	vis_file.open(vis_file_path);
+
+	this->reset();
+
+	vis_file << PreySwarm::population_size << "|" << PredatorSwarm::population_size << "\n";
+
+	vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+
+	while (step < steps_without_predators)
+	{
+		this->distances->recalculate_prey_observations();
+		this->distances->prey_observations();
+
+		this->prey_swarm->update_stats();
+
+		//this->prey_swarm->try_eat();
+
+		this->prey_swarm->update_decisions();
+		this->prey_swarm->update_movement();
+		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+		this->prey_swarm->update_fitness();
+
+		step++;
+	}
+
+	while (step < simulation_steps)
+	{
+		this->distances->recalculate_prey_observations();
+		this->distances->recalculate_prey_predator_observations();
+		this->distances->prey_observations();
+		this->distances->predator_observations();
+
+		this->prey_swarm->update_stats();
+		this->predator_swarm->update_stats();
+
+		this->predator_swarm->try_hunt();
+		//this->prey_swarm->try_eat();
+
+		prey_swarm->update_decisions();
+		predator_swarm->update_decisions();
+		this->prey_swarm->update_movement();
+		this->predator_swarm->update_movement();
+		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+		this->prey_swarm->update_fitness();
+		this->predator_swarm->update_fitness();
+
+		step++;
+	}
+
+	vis_file.close();
 }
 
 void Simulation::runInThread()

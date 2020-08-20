@@ -16,7 +16,7 @@ def main():
 
     EnvManager.set_parameters(_lp.config_file_path)
 
-    for s in [0,1,2,3,4,5]:
+    for s in [0]:
         # Get pointers to fitness array and stats array
         prey_fitness = np.zeros(_lp.population_size).astype(np.float32)
         predator_fitness = np.zeros(_lp.population_size).astype(np.float32)
@@ -32,53 +32,12 @@ def main():
         # Set EnvManager pointers to fitness and stats arrays
         env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
         env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
-#10 dokończyć
+
         prefix = 'test'
-        KKK = [0, 1, 2, 3, 4]
+        KKK = [0,1,2,4,5]
         # SET LEARNING PARAMS HERE
         if s == 0:
-            prefix = 'M1D1F1De1'
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.01
-            _lp.fill_chance = 0.01
-        elif s == 1:
-            prefix = 'M1D1F1De2'
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.02
-            _lp.fill_chance = 0.01
-        elif s == 2:
-            prefix = 'M1D1F1De3'
-            
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.03
-            _lp.fill_chance = 0.01
-        elif s == 3:
-            prefix = 'M1D1F2De1'
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.01
-            _lp.fill_chance = 0.02
-        elif s == 4:
-            prefix = 'M1D1F3De1'
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.01
-            _lp.fill_chance = 0.03
-        elif s == 5:
-            prefix = 'M1D1F2De2'
-            _lp.gen_mutation_chance = 0.01
-            _lp.gen_deletion_chance = 0.0
-            _lp.duplication_chance = 0.01
-            _lp.deletion_chance = 0.02
-            _lp.fill_chance = 0.02
+            prefix = 'RNN_8_C'
 
         save_learning_parameters(f'{prefix}')
 
@@ -123,7 +82,7 @@ def main():
 
             sleep(1)
             # Save experiment data...
-            # save_genes({'prey': GA_prey, 'predator': GA_predator}, f'{prefix}_{k}')
+            save_genes({'prey': GA_prey, 'predator': GA_predator}, f'{prefix}_{k}')
             if live_plot:
                 live_plot.save(f'{prefix}_{k}')
 

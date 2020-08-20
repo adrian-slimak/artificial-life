@@ -224,3 +224,20 @@ void PredatorSwarm::try_hunt()
 		}
 	}
 }
+
+std::string PredatorSwarm::to_string()
+{
+	std::string string = "";
+
+	for (int i = 0; i < PredatorSwarm::population_size; i++)
+	{
+		string += "1";
+		string += ";";
+		string += std::to_string(position(i, 0)) + ";" + std::to_string(position(i, 1));
+		string += ";";
+		string += std::to_string(angle[i]);
+		string += "|";
+	}
+
+	return string;
+}

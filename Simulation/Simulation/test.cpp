@@ -19,7 +19,8 @@ int main()
 
 	//auto start = std::chrono::system_clock::now();
 
-	sim.runSingleEpisode();
+	//sim.runSingleEpisode();
+	sim.create_visualization("C:/Users/adek1/source/repos/ArtificalLife/Results/vis_0.txt");
 
 	//
 	////for (int s = 0; s < 10; s++)

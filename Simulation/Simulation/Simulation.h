@@ -43,5 +43,7 @@ public:
 
 	void runInThread();
 	void threadJoin();
+
+	void create_visualization(const char *vis_file_path);
 };
 #endif

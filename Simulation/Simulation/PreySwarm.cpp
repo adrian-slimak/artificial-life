@@ -227,3 +227,19 @@ void PreySwarm::update_movement()
 //	}
 //}
 
+std::string PreySwarm::to_string()
+{
+	std::string string = "";
+
+	for (int i = 0; i < PreySwarm::population_size; i++)
+	{
+		string += (alive[i]?"1":"0");
+		string += ";";
+		string += std::to_string(position(i, 0)) + ";" + std::to_string(position(i, 1));
+		string += ";";
+		string += std::to_string(angle[i]);
+		string += "|";
+	}
+
+	return string;
+}
