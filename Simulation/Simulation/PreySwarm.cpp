@@ -29,6 +29,7 @@ float PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_ra
 int PreySwarm::hear_cells = 12;
 float PreySwarm::hear_cell_angle_rad = (float)(360.f / PreySwarm::hear_cells) * Distances::deg2rad;
 
+bool PreySwarm::food_enabled = false;
 float PreySwarm::eat_range = 5.f;
 float PreySwarm::eat_range_squared = PreySwarm::eat_range * PreySwarm::eat_range;
 int PreySwarm::eat_delay = 10;
@@ -173,14 +174,17 @@ void PreySwarm::update_movement()
 	});
 
 	// COMMUNICATION
-	if (PredatorSwarm::communication_enabled)
+	if (PreySwarm::communication_enabled)
 	{
 		int temp = 0;
 		for (int self_id = 0; self_id < PreySwarm::population_size; self_id++)
 		{
 			if (this->alive[self_id])
 			{
-				//this->food_sound_active[self_id] = (this->model->x.block(self_id,PreySwarm::vision_cells,1,PreySwarm::vision_cells).array() > 0.0f).sum()>=PreySwarm::food_sound_trigger;
+				if (PreySwarm::food_enabled)
+				{
+					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+				}
 				this->predator_sound_active[self_id] = (this->model->x.block(self_id,PreySwarm::vision_cells,1,PreySwarm::vision_cells).array() > 0.0f).any();
 			}
 		}

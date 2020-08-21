@@ -30,6 +30,7 @@ public:
 	static int hear_cells;
 	static float hear_cell_angle_rad;
 
+	static bool food_enabled;
 	static float eat_range;
 	static float eat_range_squared;
 	static int eat_delay;

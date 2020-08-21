@@ -176,9 +176,9 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PredatorSwarm::hear_cells = (int)json["predator"]["communication"]["hear_cells"].number_value();
 	PredatorSwarm::hear_cell_angle_rad = (float)(360.0 / PredatorSwarm::hear_cells) * Distances::deg2rad;
 
-	bool food_enabled = json["environment"]["food"]["enabled"].bool_value();
-	PreySwarm::vision_size = PreySwarm::vision_cells * (food_enabled ? 3 : 2);
-	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (food_enabled ? 3 : 2);
+	PreySwarm::food_enabled = json["environment"]["food"]["enabled"].bool_value();
+	PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
 	PreySwarm::observations_size = PreySwarm::vision_size + (PreySwarm::communication_enabled ? PreySwarm::hear_cells * 2 : 0);
 	PredatorSwarm::observations_size = PredatorSwarm::vision_size + (PredatorSwarm::communication_enabled ? PredatorSwarm::hear_cells : 0);
 
