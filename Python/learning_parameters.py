@@ -23,15 +23,12 @@ prey_actions_size = 2
 predator_actions_size = 3 if config["predator"]["communication"]["enabled"] else 2
 
 if config["prey"]["communication"]["enabled"]:
-    prey_observations_size += config["prey"]["communication"]["hear_cells"] * 2
-
-print(f'prey {prey_observations_size}')
+    prey_observations_size += config["prey"]["communication"]["hear_cells"]
+    if config["environment"]["food"]["enabled"]:
+        prey_observations_size += config["prey"]["communication"]["hear_cells"]
 
 if config["predator"]["communication"]["enabled"]:
     predator_observations_size += config["predator"]["communication"]["hear_cells"]
-
-print(f'predator {predator_observations_size}')
-print(f'predator {predator_actions_size}')
 
 # GENETIC ALGORITHM PARAMETERS
 # Population

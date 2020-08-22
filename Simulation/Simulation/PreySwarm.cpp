@@ -23,7 +23,6 @@ int PreySwarm::vision_cells = 13;
 float PreySwarm::vision_cell_angle_rad = (float)(PreySwarm::vision_angle / PreySwarm::vision_cells) * Distances::deg2rad;
 
 bool PreySwarm::communication_enabled = false;
-int PreySwarm::food_sound_trigger = 5;
 float PreySwarm::hear_range = 100.f;
 float PreySwarm::hear_range_squared = PreySwarm::hear_range * PreySwarm::hear_range;
 int PreySwarm::hear_cells = 12;
@@ -176,16 +175,16 @@ void PreySwarm::update_movement()
 	// COMMUNICATION
 	if (PreySwarm::communication_enabled)
 	{
-		int temp = 0;
 		for (int self_id = 0; self_id < PreySwarm::population_size; self_id++)
 		{
 			if (this->alive[self_id])
 			{
+				this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+
 				if (PreySwarm::food_enabled)
 				{
 					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
 				}
-				this->predator_sound_active[self_id] = (this->model->x.block(self_id,PreySwarm::vision_cells,1,PreySwarm::vision_cells).array() > 0.0f).any();
 			}
 		}
 	}

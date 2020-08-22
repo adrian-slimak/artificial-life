@@ -24,7 +24,6 @@ public:
 	static float vision_cell_angle_rad;
 
 	static bool communication_enabled;
-	static int food_sound_trigger;
 	static float hear_range;
 	static float hear_range_squared;
 	static int hear_cells;

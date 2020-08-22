@@ -264,10 +264,10 @@ void Visualization::renderHear(int id, bool prey)
 
 		if (prey)
 		{
-			if (prey_swarm->model->x(id, PreySwarm::vision_size + i * 2) > 0.f)
+			if (prey_swarm->model->x(id, PreySwarm::vision_size + i) > 0.f)
 				convex.setFillColor(yellow);
-			if (prey_swarm->model->x(id, PreySwarm::vision_size + i*2 + 1) > 0.f)
-				convex.setFillColor(magenta);
+			//if (prey_swarm->model->x(id, PreySwarm::vision_size + i*2 + 1) > 0.f)
+			//	convex.setFillColor(magenta);
 		}
 		else
 		{
