@@ -42,7 +42,6 @@ class Genotype:
         numOfGenes = int(self.length * init_genes)
         genesIdx = random.sample(range(0, self.length), numOfGenes)
         genesVals = np.random.normal(loc=loc, scale=scale, size=self.length)
-        # genesVals = np.random.uniform(low=0., high=1., size=100)
         for id in genesIdx:
             self.genotype[id] = genesVals[id]
 
@@ -58,20 +57,23 @@ class GeneticAlgorithm:
 
         self.model_name = model_name
 
-    def initial_population(self):
+    def initial_population(self, init_genes):
         genotype_length = sum(self.lengths)
         self.population = [Genotype(genotype_length) for i in range(self.population_size)]
         for individual in self.population:
-            individual.random_init(init_genes=_lp.init_genes, scale=_lp.init_scale)
+            individual.random_init(init_genes=init_genes, scale=_lp.init_scale)
 
-    def load_population_from_file(self, file_name, brain_name='predator'):
+    def load_population_from_file(self, file_name, brain_name='predator', n=0):
         genotype_length = sum(self.lengths)
         self.population = [Genotype(genotype_length) for i in range(self.population_size)]
 
-        with open(f'results/models/{file_name}', 'rb') as f:
-            models = load(f)[brain_name]
-            for indv, model in zip(self.population, models):
-                indv.genotype = model
+        with open(f'{_lp.results_save_path}/{file_name}', 'rb') as f:
+            best_model = load(f)[brain_name][n]
+            for indv in self.population:
+                indv.genotype = best_model.copy()
+
+    def population_shuffle(self):
+        random.shuffle(self.population)
 
     def calc_fitness(self, fitness):
         for idx, value in enumerate(fitness):
@@ -97,11 +99,10 @@ class GeneticAlgorithm:
         # Mutations
         next_gen = selected_individuals + offsprings
         for individual in next_gen:
-            GeneticAlgorithm.mutation(individual, _lp.gen_mutation_chance, _lp.gen_deletion_chance,
-                                      _lp.deletion_chance, _lp.duplication_chance, _lp.fill_chance)
+            GeneticAlgorithm.mutation(individual, _lp.gen_mutation_chance, _lp.deletion_chance, _lp.duplication_chance, _lp.fill_chance)
 
         # Elite selection
-        selected_individuals[-_lp.elite_size:] = elite
+        next_gen[-_lp.elite_size:] = elite
 
         if len(next_gen) != self.population_size:
             raise Exception("Next Gen size different than expected")
@@ -178,7 +179,7 @@ class GeneticAlgorithm:
 
         elif method == 'Two Points Per Part':
             p_s = 0
-            for p_l in lenghts:
+            for p_l in lenghts[:-1]:
                 a = random.randrange(p_s, p_s + p_l)
                 b = random.randrange(p_s, p_s + p_l)
 
@@ -197,8 +198,8 @@ class GeneticAlgorithm:
         return offsprings
 
     @staticmethod
-    def mutation(individual, gen_mutation_chance=_lp.gen_mutation_chance, gen_deletion_chance=_lp.gen_deletion_chance,
-                 deletion_chance=_lp.deletion_chance, duplication_chance=_lp.duplication_chance, fill_chance=_lp.fill_chance):
+    def mutation(individual, gen_mutation_chance=_lp.gen_mutation_chance, deletion_chance=_lp.deletion_chance,
+                 duplication_chance=_lp.duplication_chance, fill_chance=_lp.fill_chance):
         # for gen_id in range(individual.length):
         #     if individual.genotype[gen_id] == 0.:
         #         if random.random() <= gen_duplication_chance:
@@ -210,8 +211,8 @@ class GeneticAlgorithm:
         #             individual.genotype[gen_id] = random.gauss(mu=_lp.init_loc, sigma=_lp.init_scale)
 
         for gen_id in range(individual.length):
-            if random.random() <= gen_deletion_chance:
-                individual.genotype[gen_id] = 0.
+            # if random.random() <= gen_deletion_chance:
+            #     individual.genotype[gen_id] = 0.
             if random.random() <= gen_mutation_chance:
                 individual.genotype[gen_id] = np.random.normal(loc=_lp.init_loc, scale=_lp.init_scale)
 
@@ -245,6 +246,6 @@ class GeneticAlgorithm:
         for individual in self.population:
             genes.append(individual.genotype)
 
-        genes = np.array(genes)
+        genes = np.array(genes).astype(np.float32)
 
         return genes

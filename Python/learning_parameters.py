@@ -30,36 +30,31 @@ if config["prey"]["communication"]["enabled"]:
 if config["predator"]["communication"]["enabled"]:
     predator_observations_size += config["predator"]["communication"]["hear_cells"]
 
+
 # GENETIC ALGORITHM PARAMETERS
 # Population
 population_size = 100
 
 # Random Init
-init_genes = 1.
+init_genes = 0.3
 init_loc = 0.
-init_scale = 1.
+init_scale = 2.
 
 # Selection
 selection_method = 'Fittest Half'
-# selection_method = 'Roulette Wheel'
-# selection_method = 'Tournament'
 tournament_size = 30
-elite_size = 0
+elite_size = 2
 
 # Pairing
 pairing_method = 'Fittest'
 
 # Crossover
-mating_method = 'None'
-# mating_method = 'Single Point'
-# mating_method = 'Two Points'
-# mating_method = 'Single Point Per Part'
+mating_method = 'Single Point'
 # mating_method = 'Two Points Per Part'
-crossover_probability = 0.5
+crossover_probability = 0.3
 
 # Mutation
 gen_mutation_chance = 0.01
-gen_deletion_chance = 0.0
-duplication_chance = 0.0
-deletion_chance = 0.0
-fill_chance = 0.0
+duplication_chance = 0.01
+deletion_chance = 0.01
+fill_chance = 0.01

@@ -3,19 +3,26 @@ import learning_parameters as _lp
 import EnvManager
 from pickle import load
 import numpy as np
-import glob
+# import glob
 
-genes_file = 'RNN_8_C_2_genes.pkl'
+genes_file = _lp.results_save_path+'RNN_16_NC_1_genes.pkl'
+prey_genes_file = genes_file
+predator_genes_file = genes_file
+
+# prey_genes_file = _lp.results_save_path+'RNN/E1/RNN_8_NC_3_genes.pkl'
+# predator_genes_file = _lp.results_save_path+'test1_0_genes.pkl'
+
 vis_file = _lp.results_save_path+'vis_0.txt'
 
 EnvManager.set_parameters(_lp.config_file_path)
 
 env_manager = EnvManager.EnvManager()
 
-with open(_lp.results_save_path+genes_file, 'rb') as f:
-    all_genes = load(f)
-    prey_genes = np.array(all_genes['prey'][0])
-    predator_genes = np.array(all_genes['predator'][0])
+with open(prey_genes_file, 'rb') as f:
+    prey_genes = np.array(load(f)['prey'][0]).astype(np.float32)
+
+with open(predator_genes_file, 'rb') as f:
+    predator_genes = np.array(load(f)['predator'][0]).astype(np.float32)
 
 prey_genes_pointer = float(prey_genes.__array_interface__['data'][0])
 predator_genes_pointer = float(predator_genes.__array_interface__['data'][0])

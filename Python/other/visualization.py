@@ -6,7 +6,7 @@ import numpy as np
 SCALER = 2
 SCREEN_WIDTH = 512 * SCALER
 SCREEN_HEIGHT = 512 * SCALER
-SPRITE_SCALING = 0.4
+SPRITE_SCALING = 0.3
 SCREEN_TITLE = "Simulation - Visualization"
 
 
@@ -45,7 +45,7 @@ class Visualization(arcade.Window):
         # Call the parent class initializer
         super().__init__(width, height, title)
 
-        self.set_update_rate(0.0001)
+        self.set_update_rate(0.005)
 
         file_path = os.path.dirname(os.path.abspath(__file__))
         self.sprite_path = file_path + '\sprite.png'
@@ -112,7 +112,7 @@ class Visualization(arcade.Window):
 
         # Call update on all sprites
         if not self.current_step < self.n_steps:
-            self.video_writer.close()
+            # self.video_writer.close()
             self.close()
             return
 
@@ -125,8 +125,8 @@ class Visualization(arcade.Window):
         for i in range(self.n_predators):
             self.predators[i].update_state(predators_state[i])
 
-        image = arcade.get_image(0, 0)
-        self.video_writer.append_data(np.asanyarray(image))
+        # image = arcade.get_image(0, 0)
+        # self.video_writer.append_data(np.asanyarray(image))
 
         self.current_step += 1
 

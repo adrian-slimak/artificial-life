@@ -3,7 +3,7 @@
     {
         "world_size": 512,
 		"simulation_steps": 2000,
-        "steps_without_predators": 0,
+        "steps_without_predators": 250,
 
         "food":
         {
@@ -19,8 +19,8 @@
     {
         "count": 50,
 		
-		"brain_cells": 8,
-		"brain_type": "LSTM",
+		"brain_cells": 16,
+		"brain_type": "RNN",
 
         "move_speed": 1,
         "turn_speed": 8,
@@ -34,13 +34,12 @@
 			"range": 100
 		},
 
-        "eat_delay": 0,
+        "eat_delay": 10,
         "eat_range": 5.0,
 		
 		"communication":
         {
             "enabled": false,
-            "food_sound_trigger": 8,
             "hear_cells": 12,
             "hear_range": 100
         },
@@ -58,7 +57,7 @@
         "count": 2,
 		
 		"brain_cells": 8,
-		"brain_type": "LSTM",
+		"brain_type": "RNN",
 
 		"move_speed": 3,
         "turn_speed": 6,
@@ -74,7 +73,7 @@
 		
 		"confusion_effect":
         {
-            "ratio": 1,
+            "ratio": 1.0,
             "range": 30.0
         },
 		

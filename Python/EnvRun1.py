@@ -33,7 +33,7 @@ def main():
         env_manager.set_fitness_pointers(prey_fitness_pointer, predator_fitness_pointer)
         env_manager.set_stats_pointers(prey_stats_pointer, predator_stats_pointer)
 
-        prefix = 'RNN_16_NC'
+        prefix = 'RNN_16_C'
         KKK = [0,1,2,3,4]
         # SET LEARNING PARAMS HERE
 

@@ -12,7 +12,7 @@ plot_structure = \
                 'position': (0, 0),
                 'labels': ['episode', 'fitness'],
                 'lines': ['avg', 'best', 'worst'],
-                'lims': [number_of_generations, 150000],
+                'lims': [number_of_generations, 110000],
             },
 
         'prey2':
@@ -30,7 +30,7 @@ plot_structure = \
                 'position': (0, 2),
                 'labels': ['step', 'value'],
                 'lines': ['density', 'food'],
-                'lims': [number_of_generations, 10],
+                'lims': [number_of_generations, 20],
             },
 
         'predator1':
@@ -39,7 +39,7 @@ plot_structure = \
                 'position': (1, 0),
                 'labels': ['episode', 'fitness'],
                 'lines': ['avg', 'best', 'worst'],
-                'lims': [number_of_generations, 150000]
+                'lims': [number_of_generations, 110000]
              },
 
         'predator2':

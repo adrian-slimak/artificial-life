@@ -12,10 +12,10 @@ import learning_parameters as _lp
 #         _id = max(ids) + 1
 #     return _id
 
-# def save_parameters(id):
-#     with open(_lp.config_file_path, 'r') as conf_file:
-#         with open(_lp.results_save_path+f'configs/parameters_{id}.json', 'w') as f:
-#             f.writelines(conf_file.readlines())
+def save_parameters(id):
+    with open(_lp.config_file_path, 'r') as conf_file:
+        with open(_lp.results_save_path+f'{id}_config.json', 'w') as f:
+            f.writelines(conf_file.readlines())
 
 
 # def save_learning_parameters(id):
@@ -44,7 +44,6 @@ def save_learning_parameters(id):
                   f'\ncrossover_probability = {_lp.crossover_probability}' \
                   f'\n\n# Mutation' \
                   f'\ngen_mutation_chance = {_lp.gen_mutation_chance}' \
-                  f'\ngen_deletion_chance = {_lp.gen_deletion_chance}' \
                   f'\nduplication_chance = {_lp.duplication_chance}' \
                   f'\ndeletion_chance = {_lp.deletion_chance}' \
                   f'\nfill_chance = {_lp.fill_chance}'
