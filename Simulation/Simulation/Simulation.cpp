@@ -180,7 +180,6 @@ void Simulation::create_visualization(const char *vis_file_path)
 
 		this->prey_swarm->update_decisions();
 
-		//if (visualization) visualization->render();
 
 		this->prey_swarm->update_movement();
 		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
@@ -216,7 +215,6 @@ void Simulation::create_visualization(const char *vis_file_path)
 		prey_swarm->update_decisions();
 		predator_swarm->update_decisions();
 
-		//if (visualization) visualization->render();
 
 		this->prey_swarm->update_movement();
 		this->predator_swarm->update_movement();
