@@ -41,6 +41,16 @@ Distances::Distances(PreySwarm &prey_swarm, PredatorSwarm &predator_swarm)
 			predator_prey_distances[i][j] = 0.f;
 		predator_prey_angles[i] = new float[PreySwarm::population_size];
 	}
+
+	//Initialize prey->food distances table
+	//Initialize prey->food angles table
+	prey_food_distances = new float*[PreySwarm::population_size];
+	prey_food_angles = new float*[PreySwarm::population_size];
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+	{
+		prey_food_distances[i] = new float[PreySwarm::food_amount];
+		prey_food_angles[i] = new float[PreySwarm::food_amount];
+	}
 }
 
 Distances::~Distances()
@@ -64,6 +74,14 @@ Distances::~Distances()
 	}
 	delete[] predator_prey_distances;
 	delete[] predator_prey_angles;
+
+	for (int i = 0; i < PreySwarm::population_size; ++i)
+	{
+		delete[] prey_food_distances[i];
+		delete[] prey_food_angles[i];
+	}
+	delete[] prey_food_distances;
+	delete[] prey_food_angles;
 }
 
 void Distances::recalculate_prey_observations()
@@ -87,85 +105,147 @@ void Distances::recalculate_prey_observations()
 		norm_a_x = this->prey_swarm->norm(a, 0);
 		norm_a_y = this->prey_swarm->norm(a, 1);
 
-		// Update Preys with Preys
-		for (int b = a + 1; b < PreySwarm::population_size; b++)
+		if (this->prey_swarm->alive[a])
 		{
-			if (this->prey_swarm->alive[b])
+			// Update Preys with Preys
+			for (int b = a + 1; b < PreySwarm::population_size; b++)
 			{
-				Ux = this->prey_swarm->position(b, 0) - this->prey_swarm->position(a, 0);
-				Uy = this->prey_swarm->position(b, 1) - this->prey_swarm->position(a, 1);
-
-				if (Ux > Simulation::world_size_half)
-					Ux -= Simulation::world_size;
-				else if (Ux < -Simulation::world_size_half)
-					Ux += Simulation::world_size;
-				if (Uy > Simulation::world_size_half)
-					Uy -= Simulation::world_size;
-				else if (Uy < -Simulation::world_size_half)
-					Uy += Simulation::world_size;
-
-				distance = Ux * Ux + Uy * Uy;
-
-				this->prey_distances[a][b] = distance;
-				this->prey_distances[b][a] = distance;
-
-				if (distance < PreySwarm::vision_range_squared)
+				if (this->prey_swarm->alive[b])
 				{
-					angle = std::atan2((Ux * norm_a_y) - (Uy * norm_a_x), (Ux * norm_a_x) + (Uy * norm_a_y));
+					Ux = this->prey_swarm->position(b, 0) - this->prey_swarm->position(a, 0);
+					Uy = this->prey_swarm->position(b, 1) - this->prey_swarm->position(a, 1);
 
-					if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
+					if (Ux > Simulation::world_size_half)
+						Ux -= Simulation::world_size;
+					else if (Ux < -Simulation::world_size_half)
+						Ux += Simulation::world_size;
+					if (Uy > Simulation::world_size_half)
+						Uy -= Simulation::world_size;
+					else if (Uy < -Simulation::world_size_half)
+						Uy += Simulation::world_size;
+
+					distance = Ux * Ux + Uy * Uy;
+
+					this->prey_distances[a][b] = distance;
+					this->prey_distances[b][a] = distance;
+
+					if (distance < PreySwarm::vision_range_squared)
 					{
-						obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad);
-						if (distance < this->prey_swarm->model->x(a, obs_id))
-							this->prey_swarm->model->x(a, obs_id) = distance;
+						angle = std::atan2((Ux * norm_a_y) - (Uy * norm_a_x), (Ux * norm_a_x) + (Uy * norm_a_y));
+
+						if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
+						{
+							obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad);
+							if (distance < this->prey_swarm->model->x(a, obs_id))
+								this->prey_swarm->model->x(a, obs_id) = distance;
+						}
+
+						//Communication
+						if (PreySwarm::communication_enabled)
+						{
+							// Update hearing observations for specific hear cell
+							obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) + PreySwarm::vision_size;
+							if (obs_id >= PreySwarm::observations_size) // Because of some stupid issue with rounded PI value... greater precision doesn't work
+								obs_id = PreySwarm::observations_size - 1;
+
+							//if (this->prey_swarm->predator_sound_active[b])
+							//	this->prey_swarm->model->x(a, obs_id) = 1.f;
+							if (this->prey_swarm->food_sound_active[b])
+								this->prey_swarm->model->x(a, obs_id) = 1.f;
+
+							//if (PreySwarm::food_enabled)
+							//{
+							//	if (this->prey_swarm->food_sound_active[b])
+							//		this->prey_swarm->model->x(a, obs_id + 1) = 1.f;
+							//}
+						}
+
+						Ux *= -1;
+						Uy *= -1;
+
+						angle = std::atan2((Ux * this->prey_swarm->norm(b, 1)) - (Uy * this->prey_swarm->norm(b, 0)), (Ux * this->prey_swarm->norm(b, 0)) + (Uy * this->prey_swarm->norm(b, 1)));
+
+						if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
+						{
+							obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad);
+							if (distance < this->prey_swarm->model->x(b, obs_id))
+								this->prey_swarm->model->x(b, obs_id) = distance;
+						}
+
+						//Communication
+						if (PreySwarm::communication_enabled)
+						{
+							// Update hearing observations for specific hear cell
+							obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) + PreySwarm::vision_size;
+							if (obs_id >= PreySwarm::observations_size) // Because of some stupid issue with rounded PI value... greater precision doesn't work
+								obs_id = PreySwarm::observations_size - 1;
+
+							if (this->prey_swarm->predator_sound_active[a])
+								this->prey_swarm->model->x(b, obs_id) = 1.f;
+
+							//if (PreySwarm::food_enabled)
+							//{
+							//	if (this->prey_swarm->food_sound_active[a])
+							//		this->prey_swarm->model->x(b, obs_id + 1) = 1.f;
+							//}
+						}
 					}
+				}
+			}
+		}
+	}
+}
 
-					//Communication
-					if (PreySwarm::communication_enabled)
+void Distances::recalculate_prey_food_observations()
+{
+	float Ux;
+	float Uy;
+	float norm_a_x;
+	float norm_a_y;
+	float distance;
+	float angle;
+	int obs_id;
+
+	for (int p = 0; p < PreySwarm::population_size; p++)
+	{
+		norm_a_x = this->prey_swarm->norm(p, 0);
+		norm_a_y = this->prey_swarm->norm(p, 1);
+
+		if (this->prey_swarm->alive[p])
+		{
+			// Update Preys with Food
+			for (int f = 0; f < PreySwarm::food_amount; f++)
+			{
+				if (this->prey_swarm->food_alive[f])
+				{
+					Ux = this->prey_swarm->food_position(f, 0) - this->prey_swarm->position(p, 0);
+					Uy = this->prey_swarm->food_position(f, 1) - this->prey_swarm->position(p, 1);
+
+					if (Ux > Simulation::world_size_half)
+						Ux -= Simulation::world_size;
+					else if (Ux < -Simulation::world_size_half)
+						Ux += Simulation::world_size;
+					if (Uy > Simulation::world_size_half)
+						Uy -= Simulation::world_size;
+					else if (Uy < -Simulation::world_size_half)
+						Uy += Simulation::world_size;
+
+					distance = Ux * Ux + Uy * Uy;
+
+					this->prey_food_distances[p][f] = distance;
+
+					if (distance < PreySwarm::vision_range_squared)
 					{
-						// Update hearing observations for specific hear cell
-						obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) + PreySwarm::vision_size;
-						if (obs_id >= PreySwarm::observations_size) // Because of some stupid issue with rounded PI value... greater precision doesn't work
-							obs_id = PreySwarm::observations_size - 1;
+						angle = std::atan2((Ux * norm_a_y) - (Uy * norm_a_x), (Ux * norm_a_x) + (Uy * norm_a_y));
 
-						if (this->prey_swarm->predator_sound_active[b])
-							this->prey_swarm->model->x(a, obs_id) = 1.f;
+						prey_food_angles[p][f] = angle;
 
-						//if (PreySwarm::food_enabled)
-						//{
-						//	if (this->prey_swarm->food_sound_active[b])
-						//		this->prey_swarm->model->x(a, obs_id + 1) = 1.f;
-						//}
-					}
-
-					Ux *= -1;
-					Uy *= -1;
-
-					angle = std::atan2((Ux * this->prey_swarm->norm(b, 1)) - (Uy * this->prey_swarm->norm(b, 0)), (Ux * this->prey_swarm->norm(b, 0)) + (Uy * this->prey_swarm->norm(b, 1)));
-
-					if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
-					{
-						obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad);
-						if (distance < this->prey_swarm->model->x(b, obs_id))
-							this->prey_swarm->model->x(b, obs_id) = distance;
-					}
-
-					//Communication
-					if (PreySwarm::communication_enabled)
-					{
-						// Update hearing observations for specific hear cell
-						obs_id = int((Distances::PI - angle) / PreySwarm::hear_cell_angle_rad) + PreySwarm::vision_size;
-						if (obs_id >= PreySwarm::observations_size) // Because of some stupid issue with rounded PI value... greater precision doesn't work
-							obs_id = PreySwarm::observations_size - 1;
-
-						if (this->prey_swarm->predator_sound_active[a])
-							this->prey_swarm->model->x(b, obs_id) = 1.f;
-
-						//if (PreySwarm::food_enabled)
-						//{
-						//	if (this->prey_swarm->food_sound_active[a])
-						//		this->prey_swarm->model->x(b, obs_id + 1) = 1.f;
-						//}
+						if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
+						{
+							obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad) + PreySwarm::vision_cells * 2;
+							if (distance < this->prey_swarm->model->x(p, obs_id))
+								this->prey_swarm->model->x(p, obs_id) = distance;
+						}
 					}
 				}
 			}

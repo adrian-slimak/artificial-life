@@ -3,23 +3,21 @@
     {
         "world_size": 512,
 		"simulation_steps": 2000,
-        "steps_without_predators": 250,
+        "steps_without_predators": 2000,
 
         "food":
         {
-			"enabled": false,
-            "spawn_method": 1,
-            "spawn_per_step": 0,
-            "spawn_amount_reset": 0,
-            "spawn_grid_step": 4
+			"enabled": true,
+            "spawn_method": 0,
+            "amount": 50
         }
     },
 
     "prey":
     {
-        "count": 50,
+        "count": 10,
 		
-		"brain_cells": 16,
+		"brain_cells": 8,
 		"brain_type": "RNN",
 
         "move_speed": 1,
@@ -39,7 +37,7 @@
 		
 		"communication":
         {
-            "enabled": false,
+            "enabled": true,
             "hear_cells": 12,
             "hear_range": 100
         },
@@ -48,13 +46,13 @@
         {
             "start_value": 100,
             "gain_per_eat": 30,
-            "drain_per_step": 0
+            "drain_per_step": 0.2
         }
     },
 
     "predator":
     {
-        "count": 2,
+        "count": 0,
 		
 		"brain_cells": 8,
 		"brain_type": "RNN",

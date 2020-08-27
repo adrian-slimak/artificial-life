@@ -98,7 +98,7 @@ void EnvManager::run_single_episode()
 			prey_stats[0] += simulations[n].prey_swarm->number_alive;
 			prey_stats[1] += simulations[n].prey_swarm->mean_density;
 			prey_stats[2] += simulations[n].prey_swarm->mean_dispersion;
-			//prey_stats[3] += simulations[n].prey_swarm->mean_eats;
+			prey_stats[3] += simulations[n].prey_swarm->mean_eats;
 
 			predator_stats[1] += simulations[n].predator_swarm->mean_density;
 			predator_stats[2] += simulations[n].predator_swarm->mean_dispersion;
@@ -176,15 +176,18 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PredatorSwarm::hear_cell_angle_rad = (float)(360.f / PredatorSwarm::hear_cells) * Distances::deg2rad;
 
 	PreySwarm::food_enabled = json["environment"]["food"]["enabled"].bool_value();
+	PreySwarm::food_amount = (int)json["environment"]["food"]["amount"].number_value();
+	PreySwarm::food_spawn_method = (int)json["environment"]["food"]["spawn_method"].number_value();
 	PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
-	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	//PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * 2;
 
 	PreySwarm::observations_size = PreySwarm::vision_size;
 	if (PreySwarm::communication_enabled)
 	{
 		PreySwarm::observations_size += PreySwarm::hear_cells;
-		if (PreySwarm::food_enabled)
-			PreySwarm::observations_size += PreySwarm::hear_cells;
+		//if (PreySwarm::food_enabled)
+		//	PreySwarm::observations_size += PreySwarm::hear_cells;
 	}
 	PredatorSwarm::observations_size = PredatorSwarm::vision_size;
 	if (PredatorSwarm::communication_enabled)

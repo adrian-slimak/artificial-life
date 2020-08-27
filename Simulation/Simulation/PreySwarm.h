@@ -30,6 +30,8 @@ public:
 	static float hear_cell_angle_rad;
 
 	static bool food_enabled;
+	static int food_amount;
+	static int food_spawn_method;
 	static float eat_range;
 	static float eat_range_squared;
 	static int eat_delay;
@@ -48,10 +50,10 @@ public:
 	Eigen::ArrayXXf norm;
 	Eigen::ArrayXf angle;
 
-	//Eigen::ArrayXXf plants_position;
-	//bool* plants_alive;
-	//Eigen::ArrayXi eat_delays;
-	//Eigen::ArrayXf energy;
+	Eigen::ArrayXXf food_position;
+	bool* food_alive;
+	Eigen::ArrayXf energy;
+	Eigen::ArrayXi eat_delays;
 
 	bool* food_sound_active;
 	bool* predator_sound_active;
@@ -59,7 +61,7 @@ public:
 	float fitness;
 	float mean_density;
 	float mean_dispersion;
-	int number_eats;
+	float mean_eats;
 
 	INetwork *model;
 
@@ -73,6 +75,7 @@ public:
 	void update_movement();
 	void update_fitness();
 	void update_stats();
+	void update_food();
 	void try_eat();
 	void reset();
 	void set_model(float* prey_genes);

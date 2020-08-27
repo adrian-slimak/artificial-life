@@ -18,6 +18,7 @@ private:
 	sf::Texture texture;
 	sf::Sprite** prey_sprites;
 	sf::Sprite** predator_sprites;
+	sf::Sprite** food_sprites;
 
 	void initVariables();
 	void initWindow();

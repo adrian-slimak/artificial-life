@@ -36,6 +36,21 @@ void Visualization::initVariables()
 		this->predator_sprites[i]->setOrigin(sf::Vector2f(25.f, 20.f));
 		this->predator_sprites[i]->setScale(0.2f, 0.2f);
 	}
+
+	if (PreySwarm::food_enabled)
+	{
+		this->food_sprites = new sf::Sprite*[PreySwarm::food_amount];
+
+		for (int i = 0; i < PreySwarm::food_amount; i++)
+		{
+			this->food_sprites[i] = new sf::Sprite();
+			this->food_sprites[i]->setTexture(texture);
+			this->food_sprites[i]->setColor(sf::Color::Green);
+
+			this->food_sprites[i]->setOrigin(sf::Vector2f(25.f, 20.f));
+			this->food_sprites[i]->setScale(0.2f, 0.2f);
+		}
+	}
 }
 
 void Visualization::initWindow()
@@ -114,6 +129,17 @@ void Visualization::updateSwarms()
 		this->predator_sprites[i]->setPosition(x, y);
 		this->predator_sprites[i]->setRotation(this->predator_swarm->angle[i] * rad2deg);
 	}
+
+	if (PreySwarm::food_enabled)
+	{
+		for (int i = 0; i < PreySwarm::food_amount; i++)
+		{
+			x = this->prey_swarm->food_position(i, 0) + 256.f;
+			y = this->prey_swarm->food_position(i, 1) + 256.f;
+			this->food_sprites[i]->setPosition(x, y);
+			this->food_sprites[i]->setRotation(0.f);
+		}
+	}
 }
 
 void Visualization::update()
@@ -140,6 +166,13 @@ void Visualization::renderSwarms()
 
 	for (int i = 0; i < predator_swarm->population_size; i++)
 			this->window->draw(*predator_sprites[i]);
+
+	if (PreySwarm::food_enabled)
+	{
+		for (int i = 0; i < PreySwarm::food_amount; i++)
+			if (prey_swarm->food_alive[i])
+				this->window->draw(*food_sprites[i]);
+	}
 }
 
 void Visualization::renderView(int id, bool prey)
@@ -148,6 +181,8 @@ void Visualization::renderView(int id, bool prey)
 	blue.a = 128;
 	sf::Color red = sf::Color::Red;
 	red.a = 128;
+	sf::Color green = sf::Color::Green;
+	green.a = 128;
 	sf::Vertex line[] = {sf::Vertex(sf::Vector2f(10, 10)), sf::Vertex(sf::Vector2f(150, 150))};
 	sf::ConvexShape convex;
 	convex.setPointCount(3);
@@ -188,8 +223,10 @@ void Visualization::renderView(int id, bool prey)
 		{
 			if (prey_swarm->model->x(id, i) > 0.f)
 				convex.setFillColor(blue);
-			if (prey_swarm->model->x(id, 13+i) > 0.f)
+			if (prey_swarm->model->x(id, 13 + i) > 0.f)
 				convex.setFillColor(red);
+			if (prey_swarm->model->x(id, 26 + i) > 0.f)
+				convex.setFillColor(green);
 		}
 		else
 		{

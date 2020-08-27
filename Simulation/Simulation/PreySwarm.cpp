@@ -29,6 +29,8 @@ int PreySwarm::hear_cells = 12;
 float PreySwarm::hear_cell_angle_rad = (float)(360.f / PreySwarm::hear_cells) * Distances::deg2rad;
 
 bool PreySwarm::food_enabled = false;
+int PreySwarm::food_amount = 25;
+int PreySwarm::food_spawn_method = 0;
 float PreySwarm::eat_range = 5.f;
 float PreySwarm::eat_range_squared = PreySwarm::eat_range * PreySwarm::eat_range;
 int PreySwarm::eat_delay = 10;
@@ -52,8 +54,13 @@ PreySwarm::PreySwarm()
 	food_sound_active = new bool[PreySwarm::population_size];
 	predator_sound_active = new bool[PreySwarm::population_size];
 
-	//eat_delays = Eigen::ArrayXi(PreySwarm::population_size);
-	//plants_alive = new bool[PreySwarm::population_size];
+	if (PreySwarm::food_enabled)
+	{
+		food_position = Eigen::ArrayXXf(PreySwarm::food_amount, 2);
+		food_alive = new bool[PreySwarm::population_size];
+		eat_delays = Eigen::ArrayXi(PreySwarm::population_size);
+		energy = Eigen::ArrayXf(PreySwarm::population_size);
+	}
 
 	if (network_type == NetworkType::_LSTM)
 		this->model = new LSTM(PreySwarm::observations_size, PreySwarm::brain_cells, PreySwarm::actions_size, PreySwarm::population_size);
@@ -80,11 +87,86 @@ void PreySwarm::reset()
 		predator_sound_active[i] = false;
 	}
 
-	//for (int i = 0; i < population_size; i++)
-	//	plants_alive[i] = true;
-
 	position.setRandom();
 	position *= Simulation::world_size_half;
+
+	if (PreySwarm::food_enabled)
+	{
+		for (int i = 0; i < PreySwarm::food_amount; i++)
+			food_alive[i] = true;
+
+		energy.setConstant(PreySwarm::energy_start);
+		eat_delays.setZero();
+
+		if (food_spawn_method == 0)
+		{
+			food_position.setRandom();
+			food_position *= Simulation::world_size_half;
+		}
+		else if (food_spawn_method == 1)
+		{
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float r = 0.f;
+			float a = 0.f;
+
+			for (int i = 0; i < PreySwarm::food_amount / 2; i++)
+			{
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
+			}
+
+			x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+
+			for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
+			{
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
+			}
+		}
+		else if (food_spawn_method == 2)
+		{
+			float x = ((float)std::rand() / RAND_MAX) - 0.5f;
+			if (x < 0.f)
+				x = x*Simulation::world_size_half/2.f - Simulation::world_size_half/2.f;
+			else
+				x = x * Simulation::world_size_half / 2.f + Simulation::world_size_half / 2.f;
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f);
+			if (y < 0.f)
+				y = y * Simulation::world_size_half / 2.f - Simulation::world_size_half / 2.f;
+			else
+				y = y * Simulation::world_size_half / 2.f + Simulation::world_size_half / 2.f;
+			float r = 0.f;
+			float a = 0.f;
+
+			for (int i = 0; i < PreySwarm::food_amount; i++)
+			{
+				//a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				//r = ((float)std::rand() / RAND_MAX) * 30.f;
+				//this->food_position(i, 0) = r * std::cos(a) + x;
+				//this->food_position(i, 1) = r * sin(a) + y;
+				x = (((float)std::rand() / RAND_MAX) - 0.5f);
+				y = (((float)std::rand() / RAND_MAX) - 0.5f);
+				if (x < 0.f)
+					x = x * Simulation::world_size_half - Simulation::world_size_half / 2.f;
+				else
+					x = x * Simulation::world_size_half + Simulation::world_size_half / 2.f;
+
+				if (y < 0.f)
+					y = y * Simulation::world_size_half + Simulation::world_size_half / 2.f;
+				else
+					y = y * Simulation::world_size_half - Simulation::world_size_half / 2.f;
+
+				this->food_position(i, 0) = x;
+				this->food_position(i, 1) = y;
+			}
+		}
+	}
 
 	angle.setRandom();
 	angle += 1.f;
@@ -93,10 +175,7 @@ void PreySwarm::reset()
 	fitness = 0.f;
 	mean_density = 0.f;
 	mean_dispersion = 0.f;
-	number_eats = 0;
-
-	//energy.setConstant(energy_start);
-	//eat_delays.setZero();
+	mean_eats = 0.f;
 
 	this->model->reset();
 }
@@ -179,56 +258,88 @@ void PreySwarm::update_movement()
 		{
 			if (this->alive[self_id])
 			{
-				this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-
-				if (PreySwarm::food_enabled)
-				{
+				//this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any();
 					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-				}
+
+				//if (PreySwarm::food_enabled)
+				//{
+				//	this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+				//}
 			}
 		}
 	}
 }
 
-//void PreySwarm::try_eat()
-//{
-//	int target_id;
-//	float min_dist;
-//
-//	for (int prey_id = 0; prey_id < population_size; prey_id++)
-//	{
-//		// If attack delay is greater than 0, prey cant eat yet
-//		if (eat_delays[prey_id] > 0)
-//			eat_delays[prey_id] -= 1;
-//		else
-//		{
-//			target_id = -1;
-//			min_dist = 1000000.f;
-//			// Prey can eat now, find closest plant
-//			for (int plant_id = 0; plant_id < PreySwarm::population_size; plant_id++)
-//			{
-//				if (this->plants_alive[prey_id] &&
-//					std::abs(distances->prey_plant_angles[prey_id][plant_id]) < PreySwarm::vision_angle_half_rad &&
-//					distances->prey_plant_distances[prey_id][plant_id] < min_dist)
-//				{
-//					min_dist = distances->prey_plant_distances[prey_id][plant_id];
-//					target_id = prey_id;
-//				}
-//			}
-//
-//			if (min_dist > PreySwarm::eat_range)
-//				target_id = -1;
-//
-//			if (target_id > -1)
-//			{
-//				this->number_eats++;
-//				this->energy(prey_id) += energy_gain_per_eat;
-//				eat_delays[prey_id] = eat_delay;
-//				this->plants_alive[target_id] = false;
-//			}
-//		}
-//	}
-//}
+void PreySwarm::try_eat()
+{
+	int target_id;
+	float min_dist;
+	for (int prey_id = 0; prey_id < population_size; prey_id++)
+	{
+		if (this->alive[prey_id])
+		{
+			// If attack delay is greater than 0, prey cant eat yet
+			if (eat_delays[prey_id] > 0)
+				eat_delays[prey_id] -= 1;
+			else
+			{
+				target_id = -1;
+				min_dist = PreySwarm::eat_range_squared;
+				// Prey can eat now, find closest plant
+				for (int plant_id = 0; plant_id < PreySwarm::food_amount; plant_id++)
+				{
+					if (this->food_alive[plant_id] &&
+						std::abs(distances->prey_food_angles[prey_id][plant_id]) < PreySwarm::vision_angle_half_rad &&
+						distances->prey_food_distances[prey_id][plant_id] < min_dist)
+					{
+						min_dist = distances->prey_food_distances[prey_id][plant_id];
+						target_id = plant_id;
+					}
+				}
+
+				if (target_id > -1)
+				{
+					this->mean_eats += 1.f;
+					this->energy(prey_id) += energy_gain_per_eat;
+					eat_delays[prey_id] = eat_delay;
+					this->food_alive[target_id] = false;
+				}
+			}
+
+
+			this->energy(prey_id) -= PreySwarm::energy_drain_per_step;
+			if (this->energy(prey_id) <= 0.f)
+				this->alive[prey_id] = false;
+		}
+	}
+}
+
+void PreySwarm::update_food()
+{
+	if (PreySwarm::food_spawn_method == 0)
+	{
+		for (int food_id = 0; food_id < PreySwarm::food_amount; food_id++)
+		{
+			if (!this->food_alive[food_id])
+			{
+				float x = (((float)std::rand() / RAND_MAX) - 0.5f) * Simulation::world_size;
+				float y = (((float)std::rand() / RAND_MAX) - 0.5f) * Simulation::world_size;
+
+				this->food_alive[food_id] = true;
+				this->food_position(food_id, 0) = x;
+				this->food_position(food_id, 1) = y;
+			}
+		}
+	}
+	else if (PreySwarm::food_spawn_method == 1)
+	{
+
+	}
+	else if (PreySwarm::food_spawn_method == 2)
+	{
+
+	}
+}
 
 std::string PreySwarm::to_string()
 {
