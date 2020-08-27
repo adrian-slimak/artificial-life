@@ -130,7 +130,7 @@ void Simulation::runSingleEpisode()
 	this->prey_swarm->mean_density /= simulation_steps;
 	this->prey_swarm->mean_dispersion /= simulation_steps;
 	if (PreySwarm::food_enabled)
-		this->prey_swarm->mean_eats /= simulation_steps;
+		this->prey_swarm->mean_eats /= PreySwarm::population_size;
 
 	int simulation_steps_predators = (simulation_steps - steps_without_predators);
 	if (simulation_steps_predators > 0)
