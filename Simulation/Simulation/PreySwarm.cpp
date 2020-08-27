@@ -57,7 +57,7 @@ PreySwarm::PreySwarm()
 	if (PreySwarm::food_enabled)
 	{
 		food_position = Eigen::ArrayXXf(PreySwarm::food_amount, 2);
-		food_alive = new bool[PreySwarm::population_size];
+		food_alive = new bool[PreySwarm::food_amount];
 		eat_delays = Eigen::ArrayXi(PreySwarm::population_size);
 		energy = Eigen::ArrayXf(PreySwarm::population_size);
 	}
@@ -107,8 +107,7 @@ void PreySwarm::reset()
 		{
 			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
 			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
-			float r = 0.f;
-			float a = 0.f;
+			float r, a = 0.f;
 
 			for (int i = 0; i < PreySwarm::food_amount / 2; i++)
 			{
@@ -336,7 +335,47 @@ void PreySwarm::update_food()
 	}
 	else if (PreySwarm::food_spawn_method == 1)
 	{
+		int food_left = 0;
 
+		for (int i = 0; i < PreySwarm::food_amount / 2; i++)
+			food_left += food_alive[i];
+
+		if (food_left < 5)
+		{
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float r, a = 0.f;
+
+			for (int i = 0; i < PreySwarm::food_amount / 2; i++)
+			{
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
+				this->food_alive[i] = true;
+			}
+		}
+
+		food_left = 0;
+
+		for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
+			food_left += food_alive[i];
+
+		if (food_left < 5)
+		{
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float r, a = 0.f;
+
+			for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
+			{
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
+				this->food_alive[i] = true;
+			}
+		}
 	}
 	else if (PreySwarm::food_spawn_method == 2)
 	{
