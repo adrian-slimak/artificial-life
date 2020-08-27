@@ -132,10 +132,9 @@ void Simulation::runSingleEpisode()
 	if (PreySwarm::food_enabled)
 		this->prey_swarm->mean_eats /= simulation_steps;
 
-
-	if (PredatorSwarm::population_size > 0)
+	int simulation_steps_predators = (simulation_steps - steps_without_predators);
+	if (simulation_steps_predators > 0)
 	{
-		int simulation_steps_predators = (simulation_steps - steps_without_predators);
 		this->predator_swarm->mean_density /= (float)simulation_steps_predators;
 		this->predator_swarm->mean_dispersion /= (float)simulation_steps_predators; // Czy na pewno tak i czy to ma sens??
 		this->predator_swarm->mean_attacks = this->predator_swarm->number_attacks / PredatorSwarm::population_size;
@@ -150,45 +149,79 @@ void Simulation::create_visualization(const char *vis_file_path)
 
 	this->reset();
 
-	vis_file << PreySwarm::population_size << "|" << PredatorSwarm::population_size << "\n";
+	if (PreySwarm::food_enabled)
+	{
+		vis_file << PreySwarm::population_size << "|" << PredatorSwarm::population_size << "|" << PreySwarm::food_amount << "\n";
+		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n" << this->prey_swarm->food_to_string() << "\n";
+	}
+	else
+	{
+		vis_file << PreySwarm::population_size << "|" << PredatorSwarm::population_size << "\n";
+		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+	}
 
-	vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
 
+	// Warmup without predators
 	while (step < steps_without_predators)
 	{
 		this->distances->recalculate_prey_observations();
+		if (PreySwarm::food_enabled)
+			this->distances->recalculate_prey_food_observations();
 		this->distances->prey_observations();
 
-		this->prey_swarm->update_stats();
+		// Update Density and Dispersion
+		this->prey_swarm->update_stats(); // Tutaj bo potem ich ruszam...
 
-		//this->prey_swarm->try_eat();
+		if (PreySwarm::food_enabled)
+		{
+			this->prey_swarm->try_eat();
+			this->prey_swarm->update_food();
+		}
 
 		this->prey_swarm->update_decisions();
+
+		//if (visualization) visualization->render();
+
 		this->prey_swarm->update_movement();
 		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+		if(PreySwarm::food_enabled)
+			vis_file << this->prey_swarm->food_to_string() << "\n";
+
 		this->prey_swarm->update_fitness();
 
 		step++;
 	}
 
+	// Main simulation loop
 	while (step < simulation_steps)
 	{
 		this->distances->recalculate_prey_observations();
+		if (PreySwarm::food_enabled)
+			this->distances->recalculate_prey_food_observations();
 		this->distances->recalculate_prey_predator_observations();
 		this->distances->prey_observations();
 		this->distances->predator_observations();
 
+		// Update Density and Dispersion
 		this->prey_swarm->update_stats();
 		this->predator_swarm->update_stats();
 
-		this->predator_swarm->try_hunt();
-		//this->prey_swarm->try_eat();
+		this->predator_swarm->try_hunt(); // Przed update stats???
+		if (PreySwarm::food_enabled)
+		{
+			this->prey_swarm->try_eat();
+			this->prey_swarm->update_food();
+		}
 
 		prey_swarm->update_decisions();
 		predator_swarm->update_decisions();
+
+		//if (visualization) visualization->render();
+
 		this->prey_swarm->update_movement();
 		this->predator_swarm->update_movement();
 		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+
 		this->prey_swarm->update_fitness();
 		this->predator_swarm->update_fitness();
 

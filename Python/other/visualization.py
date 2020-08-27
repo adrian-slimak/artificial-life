@@ -8,6 +8,7 @@ SCREEN_WIDTH = 512 * SCALER
 SCREEN_HEIGHT = 512 * SCALER
 SPRITE_SCALING = 0.3
 SCREEN_TITLE = "Simulation - Visualization"
+FOOD_ENABLED = False
 
 
 class Agent(arcade.Sprite):
@@ -63,14 +64,18 @@ class Visualization(arcade.Window):
         n = self.simulation_steps[0].split('|')
         self.n_preys = int(n[0])
         self.n_predators = int(n[1])
+        if FOOD_ENABLED:
+            self.n_food = int(n[2])
 
         # Variables that will hold sprite lists
         self.prey_sprites = None
         self.predator_sprites = None
+        self.food_sprites = None
 
         # Set up the player info
         self.preys = []
         self.predators = []
+        self.food = []
 
         # Set the background color
         arcade.set_background_color(arcade.color.BLACK)
@@ -81,6 +86,7 @@ class Visualization(arcade.Window):
         # Sprite lists
         self.prey_sprites = arcade.SpriteList()
         self.predator_sprites = arcade.SpriteList()
+        self.food_sprites = arcade.SpriteList()
 
         # Set up the agents
         for i in range(self.n_preys):
@@ -94,6 +100,13 @@ class Visualization(arcade.Window):
             agent._set_color(arcade.color.RED)
             self.predators.append(agent)
             self.predator_sprites.append(agent)
+
+        if FOOD_ENABLED:
+            for i in range(self.n_food):
+                agent = Agent(self.sprite_path, SPRITE_SCALING)
+                agent._set_color(arcade.color.GREEN)
+                self.food.append(agent)
+                self.food_sprites.append(agent)
 
     def on_draw(self):
         """
@@ -116,14 +129,23 @@ class Visualization(arcade.Window):
             self.close()
             return
 
-        preys_state = self.simulation_steps[self.current_step*2+1].split('|')
-        predators_state = self.simulation_steps[self.current_step*2+2].split('|')
+        k = self.current_step * 2
+        if FOOD_ENABLED:
+            k = self.current_step * 3
+
+        preys_state = self.simulation_steps[k+1].split('|')
+        predators_state = self.simulation_steps[k+2].split('|')
 
         for i in range(self.n_preys):
             self.preys[i].update_state(preys_state[i])
 
         for i in range(self.n_predators):
             self.predators[i].update_state(predators_state[i])
+
+        if FOOD_ENABLED:
+            food_state = self.simulation_steps[k+3].split('|')
+            for i in range(self.n_predators):
+                self.food[i].update_state(food_state[i])
 
         # image = arcade.get_image(0, 0)
         # self.video_writer.append_data(np.asanyarray(image))

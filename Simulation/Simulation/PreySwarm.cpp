@@ -309,7 +309,10 @@ void PreySwarm::try_eat()
 
 			this->energy(prey_id) -= PreySwarm::energy_drain_per_step;
 			if (this->energy(prey_id) <= 0.f)
+			{
 				this->alive[prey_id] = false;
+				this->number_alive -= 1;
+			}
 		}
 	}
 }
@@ -352,6 +355,21 @@ std::string PreySwarm::to_string()
 		string += std::to_string(position(i, 0)) + ";" + std::to_string(position(i, 1));
 		string += ";";
 		string += std::to_string(angle[i]);
+		string += "|";
+	}
+
+	return string;
+}
+
+std::string PreySwarm::food_to_string()
+{
+	std::string string = "";
+
+	for (int i = 0; i < PreySwarm::food_amount; i++)
+	{
+		string += (food_alive[i] ? "1" : "0");
+		string += ";";
+		string += std::to_string(food_position(i, 0)) + ";" + std::to_string(food_position(i, 1));
 		string += "|";
 	}
 

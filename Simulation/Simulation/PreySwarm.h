@@ -80,5 +80,6 @@ public:
 	void reset();
 	void set_model(float* prey_genes);
 	std::string to_string();
+	std::string food_to_string();
 };
 #endif
