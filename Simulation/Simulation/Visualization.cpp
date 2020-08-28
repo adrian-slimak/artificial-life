@@ -157,8 +157,8 @@ void Visualization::renderSwarms()
 
 	//for (int i = 0; i < predator_swarm->population_size; i++)
 	//	if (predator_swarm->alive[i])
-		renderHear(0, true);
-		//renderView(0, true);
+		//renderHear(0, true);
+		renderView(0, true);
 
 	for (int i = 0; i < prey_swarm->population_size; i++)
 		if (prey_swarm->alive[i])
@@ -196,15 +196,15 @@ void Visualization::renderView(int id, bool prey)
 
 	if (prey)
 	{
-		x = prey_swarm->position(id, 0) + 256;
-		y = prey_swarm->position(id, 1) + 256;
+		x = prey_swarm->position(id, 0) + 256.f;
+		y = prey_swarm->position(id, 1) + 256.f;
 		arc_start = (prey_swarm->angle[id] - PreySwarm::vision_angle_half_rad);
 		range = PreySwarm::vision_range;
 	}
 	else
 	{
-		x = predator_swarm->position(id, 0) + 256;
-		y = predator_swarm->position(id, 1) + 256;
+		x = predator_swarm->position(id, 0) + 256.f;
+		y = predator_swarm->position(id, 1) + 256.f;
 		arc_start = (predator_swarm->angle[id] - PredatorSwarm::vision_angle_half_rad);
 		range = PredatorSwarm::vision_range;
 	}
@@ -225,8 +225,8 @@ void Visualization::renderView(int id, bool prey)
 				convex.setFillColor(blue);
 			if (prey_swarm->model->x(id, 13 + i) > 0.f)
 				convex.setFillColor(red);
-			if (prey_swarm->model->x(id, 26 + i) > 0.f)
-				convex.setFillColor(green);
+			//if (prey_swarm->model->x(id, 26 + i) > 0.f)
+			//	convex.setFillColor(green);
 		}
 		else
 		{

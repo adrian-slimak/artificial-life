@@ -105,8 +105,8 @@ void PreySwarm::reset()
 		}
 		else if (food_spawn_method == 1)
 		{
-			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
-			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
 			float r, a = 0.f;
 
 			for (int i = 0; i < PreySwarm::food_amount / 2; i++)
@@ -117,8 +117,8 @@ void PreySwarm::reset()
 				this->food_position(i, 1) = r * sin(a) + y;
 			}
 
-			x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
-			y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
 
 			for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
 			{
@@ -130,39 +130,28 @@ void PreySwarm::reset()
 		}
 		else if (food_spawn_method == 2)
 		{
-			float x = ((float)std::rand() / RAND_MAX) - 0.5f;
-			if (x < 0.f)
-				x = x*Simulation::world_size_half/2.f - Simulation::world_size_half/2.f;
-			else
-				x = x * Simulation::world_size_half / 2.f + Simulation::world_size_half / 2.f;
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (440.f);
 			float y = (((float)std::rand() / RAND_MAX) - 0.5f);
-			if (y < 0.f)
-				y = y * Simulation::world_size_half / 2.f - Simulation::world_size_half / 2.f;
+			if (x < -170.f || x > 170.f)
+			{
+				y *= 440.f;
+			}
 			else
-				y = y * Simulation::world_size_half / 2.f + Simulation::world_size_half / 2.f;
+			{
+				if (y > 0.f)
+					y = y * 100.f + 170.f;
+				else
+					y = y * 100.f - 170.f;
+			}
 			float r = 0.f;
 			float a = 0.f;
 
 			for (int i = 0; i < PreySwarm::food_amount; i++)
 			{
-				//a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
-				//r = ((float)std::rand() / RAND_MAX) * 30.f;
-				//this->food_position(i, 0) = r * std::cos(a) + x;
-				//this->food_position(i, 1) = r * sin(a) + y;
-				x = (((float)std::rand() / RAND_MAX) - 0.5f);
-				y = (((float)std::rand() / RAND_MAX) - 0.5f);
-				if (x < 0.f)
-					x = x * Simulation::world_size_half - Simulation::world_size_half / 2.f;
-				else
-					x = x * Simulation::world_size_half + Simulation::world_size_half / 2.f;
-
-				if (y < 0.f)
-					y = y * Simulation::world_size_half + Simulation::world_size_half / 2.f;
-				else
-					y = y * Simulation::world_size_half - Simulation::world_size_half / 2.f;
-
-				this->food_position(i, 0) = x;
-				this->food_position(i, 1) = y;
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
 			}
 		}
 	}
@@ -343,8 +332,8 @@ void PreySwarm::update_food()
 
 		if (food_left < 4)
 		{
-			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
-			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
 			float r, a = 0.f;
 
 			for (int i = 0; i < PreySwarm::food_amount / 2; i++)
@@ -364,8 +353,8 @@ void PreySwarm::update_food()
 
 		if (food_left < 4)
 		{
-			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
-			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
 			float r, a = 0.f;
 
 			for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
@@ -380,7 +369,26 @@ void PreySwarm::update_food()
 	}
 	else if (PreySwarm::food_spawn_method == 2)
 	{
+		int food_left = 0;
 
+		for (int i = 0; i < PreySwarm::food_amount; i++)
+			food_left += food_alive[i];
+
+		if (food_left < 4)
+		{
+			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 60.f);
+			float r, a = 0.f;
+
+			for (int i = 0; i < PreySwarm::food_amount; i++)
+			{
+				a = ((float)std::rand() / RAND_MAX) * Distances::PI_2;
+				r = ((float)std::rand() / RAND_MAX) * 30.f;
+				this->food_position(i, 0) = r * std::cos(a) + x;
+				this->food_position(i, 1) = r * sin(a) + y;
+				this->food_alive[i] = true;
+			}
+		}
 	}
 }
 
