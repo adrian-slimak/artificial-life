@@ -178,7 +178,8 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PreySwarm::food_enabled = json["environment"]["food"]["enabled"].bool_value();
 	PreySwarm::food_amount = (int)json["environment"]["food"]["amount"].number_value();
 	PreySwarm::food_spawn_method = (int)json["environment"]["food"]["spawn_method"].number_value();
-	PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	// PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	PreySwarm::vision_size = PreySwarm::vision_cells * 2; // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
 	//PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
 	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * 2;
 

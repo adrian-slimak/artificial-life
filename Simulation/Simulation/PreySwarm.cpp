@@ -258,7 +258,8 @@ void PreySwarm::update_movement()
 			if (this->alive[self_id])
 			{
 				//this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+					// this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any(); // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
 
 				//if (PreySwarm::food_enabled)
 				//{
@@ -340,7 +341,7 @@ void PreySwarm::update_food()
 		for (int i = 0; i < PreySwarm::food_amount / 2; i++)
 			food_left += food_alive[i];
 
-		if (food_left < 5)
+		if (food_left < 4)
 		{
 			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
 			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
@@ -361,7 +362,7 @@ void PreySwarm::update_food()
 		for (int i = PreySwarm::food_amount / 2; i < PreySwarm::food_amount; i++)
 			food_left += food_alive[i];
 
-		if (food_left < 5)
+		if (food_left < 4)
 		{
 			float x = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);
 			float y = (((float)std::rand() / RAND_MAX) - 0.5f) * (Simulation::world_size - 50.f);

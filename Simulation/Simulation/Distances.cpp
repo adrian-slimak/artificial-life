@@ -242,7 +242,8 @@ void Distances::recalculate_prey_food_observations()
 
 						if (std::abs(angle) < PreySwarm::vision_angle_half_rad)
 						{
-							obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad) + PreySwarm::vision_cells * 2;
+							// obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad) + PreySwarm::vision_cells * 2;
+							obs_id = int((PreySwarm::vision_angle_half_rad - angle) / PreySwarm::vision_cell_angle_rad) + PreySwarm::vision_cells; // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
 							if (distance < this->prey_swarm->model->x(p, obs_id))
 								this->prey_swarm->model->x(p, obs_id) = distance;
 						}
