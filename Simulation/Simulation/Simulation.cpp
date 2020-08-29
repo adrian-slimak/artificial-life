@@ -274,6 +274,8 @@ void Simulation::create_visualization(const char *vis_file_path)
 		this->prey_swarm->update_movement();
 		this->predator_swarm->update_movement();
 		vis_file << this->prey_swarm->to_string() << "\n" << this->predator_swarm->to_string() << "\n";
+		if(PreySwarm::food_enabled)
+			vis_file << this->prey_swarm->food_to_string() << "\n";
 
 		this->prey_swarm->update_fitness();
 		this->predator_swarm->update_fitness();

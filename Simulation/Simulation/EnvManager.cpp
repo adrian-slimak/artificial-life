@@ -178,17 +178,17 @@ void EnvManager::set_parameters(const char *params_file_path)
 	PreySwarm::food_enabled = json["environment"]["food"]["enabled"].bool_value();
 	PreySwarm::food_amount = (int)json["environment"]["food"]["amount"].number_value();
 	PreySwarm::food_spawn_method = (int)json["environment"]["food"]["spawn_method"].number_value();
-	PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
-	//PreySwarm::vision_size = PreySwarm::vision_cells * 2; // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
+	//PreySwarm::vision_size = PreySwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
+	PreySwarm::vision_size = PreySwarm::vision_cells * 3; // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
 	//PredatorSwarm::vision_size = PredatorSwarm::vision_cells * (PreySwarm::food_enabled ? 3 : 2);
 	PredatorSwarm::vision_size = PredatorSwarm::vision_cells * 2;
 
 	PreySwarm::observations_size = PreySwarm::vision_size;
 	if (PreySwarm::communication_enabled)
 	{
-		PreySwarm::observations_size += PreySwarm::hear_cells;
-		if (PreySwarm::food_enabled)
-			PreySwarm::observations_size += PreySwarm::hear_cells;
+		PreySwarm::observations_size += PreySwarm::hear_cells * 2;
+		//if (PreySwarm::food_enabled)
+		//	PreySwarm::observations_size += PreySwarm::hear_cells;
 	}
 	PredatorSwarm::observations_size = PredatorSwarm::vision_size;
 	if (PredatorSwarm::communication_enabled)
