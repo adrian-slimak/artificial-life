@@ -247,13 +247,12 @@ void PreySwarm::update_movement()
 			if (this->alive[self_id])
 			{
 				//this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-					// this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any(); // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
+				this->predator_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells, 1, PreySwarm::vision_cells).array() > 0.0f).any(); // HEREEEEEEEEEEEEEEEEEEEEEEEEEEE
 
-				//if (PreySwarm::food_enabled)
-				//{
-				//	this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
-				//}
+				if (PreySwarm::food_enabled)
+				{
+					this->food_sound_active[self_id] = (this->model->x.block(self_id, PreySwarm::vision_cells * 2, 1, PreySwarm::vision_cells).array() > 0.0f).any();
+				}
 			}
 		}
 	}
