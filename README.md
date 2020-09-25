@@ -24,6 +24,8 @@ preys and predators.
 ## Description
 This repository contains source code for the master thesis.
 
+Some visualizations from learning process can be found [here](http://bit.ly/praca_magisterska_adrian_slimak).
+
 ## How to run
 
 First you have to build virtual environment (written in C++) as a python site-package.
