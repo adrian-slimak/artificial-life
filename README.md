@@ -24,6 +24,9 @@ preys and predators.
 ## Description
 This repository contains source code for the master thesis.
 
+There is also a version available in which the simulation environment was created in Unity and using the Tensorflow library. However, it is not finished. It was decided to use an environment written in C++ because of the higher computing efficiency and much shorter simulation time.
+It can be found [here](http://bit.ly/praca_magisterska_adrian_slimak).
+
 Some visualizations from learning process can be found [here](http://bit.ly/praca_magisterska_adrian_slimak).
 
 ## How to run
